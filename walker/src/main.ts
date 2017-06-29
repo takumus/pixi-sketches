@@ -25,64 +25,64 @@ export default class Main extends Canvas {
         H: this.addPos(0, 0, "H")
     }
     public init() {
-        Object.keys(this.len).forEach((k) => {
-            this.len[k] *= 4;
-        });
+        Object.keys(this.len).forEach((k) => this.len[k] *= 4);
     }
     public draw() {
-        const {A, B, C, D, E, F, G, H} = this.pos;
-        const {AB, BC, DC, DF, CF, DE, BE, EG, FG, EH, GH} = this.len;
-        this.canvas.clear();
-        A.x = this.size.width / 2;
-        A.y = this.size.height / 2;
+        const pos = this.pos;
+        const len = this.len;
 
-        D.x = A.x + 38.0 * 4;
-        D.y = A.y + 7.8 * 4;
+        pos.A.x = this.size.width / 2;
+        pos.A.y = this.size.height / 2;
+
+        //仮
+        pos.D.x = pos.A.x + 38.0 * 4;
+        pos.D.y = pos.A.y + 7.8 * 4;
+        //
 
         this.cr += 0.05;
-        B.x = Math.cos(this.cr) * AB + A.x;
-        B.y = Math.sin(this.cr) * AB + A.y;
+        pos.B.x = Math.cos(this.cr) * len.AB + pos.A.x;
+        pos.B.y = Math.sin(this.cr) * len.AB + pos.A.y;
 
-        const bd = Math.sqrt((B.x - D.x) * (B.x - D.x) + (B.y - D.y) * (B.y - D.y));
-        const cdb = Math.acos((bd * bd + DC * DC - BC * BC) / (2 * bd * DC));
-        const tr1 = Math.atan2(B.y - D.y, B.x - D.x);
-        C.x = Math.cos(cdb + tr1) * DC + D.x;
-        C.y = Math.sin(cdb + tr1) * DC + D.y;
+        const bd = Math.sqrt((pos.B.x - pos.D.x) * (pos.B.x - pos.D.x) + (pos.B.y - pos.D.y) * (pos.B.y - pos.D.y));
+        const cdb = Math.acos((bd * bd + len.DC * len.DC - len.BC * len.BC) / (2 * bd * len.DC));
+        const tr1 = Math.atan2(pos.B.y - pos.D.y, pos.B.x - pos.D.x);
+        pos.C.x = Math.cos(cdb + tr1) * len.DC + pos.D.x;
+        pos.C.y = Math.sin(cdb + tr1) * len.DC + pos.D.y;
         
-        const cdf = Math.acos((DC * DC + DF * DF - CF * CF) / (2 * DC * DF));
+        const cdf = Math.acos((len.DC * len.DC + len.DF * len.DF - len.CF * len.CF) / (2 * len.DC * len.DF));
 
         const tr2 = cdb + tr1;
-        F.x = Math.cos(cdf + tr2) * DF + D.x;
-        F.y = Math.sin(cdf + tr2) * DF + D.y;
+        pos.F.x = Math.cos(cdf + tr2) * len.DF + pos.D.x;
+        pos.F.y = Math.sin(cdf + tr2) * len.DF + pos.D.y;
 
-        //const bd = Math.sqrt((B.x - D.x) * (B.x - D.x) + (B.y - D.y) * (B.y - D.y));
-        const bde = Math.acos((bd * bd + DE * DE - BE * BE) / (2 * bd * DE));
-        E.x = Math.cos(-bde + tr1) * DE + D.x;
-        E.y = Math.sin(-bde + tr1) * DE + D.y;
+        const bde = Math.acos((bd * bd + len.DE * len.DE - len.BE * len.BE) / (2 * bd * len.DE));
+        pos.E.x = Math.cos(-bde + tr1) * len.DE + pos.D.x;
+        pos.E.y = Math.sin(-bde + tr1) * len.DE + pos.D.y;
 
-        const ef = Math.sqrt((E.x - F.x) * (E.x - F.x) + (E.y - F.y) * (E.y - F.y));
-        const def = Math.acos((DE * DE + ef * ef - DF * DF) / (2 * DE * ef));
-        const feg = Math.acos((ef * ef + EG * EG - FG * FG) / (2 * ef * EG));
-        const tr3 = Math.atan2(F.y - E.y, F.x - E.x);
-        G.x = Math.cos(feg + tr3) * EG + E.x;
-        G.y = Math.sin(feg + tr3) * EG + E.y;
+        const ef = Math.sqrt((pos.E.x - pos.F.x) * (pos.E.x - pos.F.x) + (pos.E.y - pos.F.y) * (pos.E.y - pos.F.y));
+        const feg = Math.acos((ef * ef + len.EG * len.EG - len.FG * len.FG) / (2 * ef * len.EG));
+        const tr3 = Math.atan2(pos.F.y - pos.E.y, pos.F.x - pos.E.x);
+        pos.G.x = Math.cos(feg + tr3) * len.EG + pos.E.x;
+        pos.G.y = Math.sin(feg + tr3) * len.EG + pos.E.y;
         
-        const geh = Math.acos((EG * EG + EH * EH - GH * GH) / (2 * EG * EH));
+        const geh = Math.acos((len.EG * len.EG + len.EH * len.EH - len.GH * len.GH) / (2 * len.EG * len.EH));
 
-        H.x = Math.cos(feg + tr3 + geh) * EH + E.x;
-        H.y = Math.sin(feg + tr3 + geh) * EH + E.y;
+        pos.H.x = Math.cos(feg + tr3 + geh) * len.EH + pos.E.x;
+        pos.H.y = Math.sin(feg + tr3 + geh) * len.EH + pos.E.y;
 
-        this.line(A, B);
-        this.line(B, C);
-        this.line(D, C);
-        this.line(D, F);
-        this.line(C, F);
-        this.line(B, E);
-        this.line(D, E);
-        this.line(E, G);
-        this.line(F, G);
-        this.line(G, H);
-        this.line(E, H);
+        this.canvas.clear();
+        
+        this.line(pos.A, pos.B);
+        this.line(pos.B, pos.C);
+        this.line(pos.D, pos.C);
+        this.line(pos.D, pos.F);
+        this.line(pos.C, pos.F);
+        this.line(pos.B, pos.E);
+        this.line(pos.D, pos.E);
+        this.line(pos.E, pos.G);
+        this.line(pos.F, pos.G);
+        this.line(pos.G, pos.H);
+        this.line(pos.E, pos.H);
     }
     public addPos(x: number, y: number, name: string): Pos {
         const pos = new Pos(x, y, name);;

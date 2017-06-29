@@ -8,7 +8,12 @@
     <title>pixi</title>
     <script src="./libs/pixi.min.js"></script>
     <script src="./libs/tween.js"></script>
-	<script src="./js/bundle.js"></script>
+	<script src="./libs/jsloader.js"></script>
+    <script type="text/javascript">
+        JSLoader.load([
+            "./js/bundle.js"
+        ]);
+    </script>
     <style>
     body, html{
         height: 100%;
