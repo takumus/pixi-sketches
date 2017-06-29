@@ -71,6 +71,7 @@
 	var mousedown = function (e) {
 	    main.mouse.x = e.clientX;
 	    main.mouse.y = e.clientY;
+	    main.mousePressed = true;
 	    main.mousedown();
 	};
 	var mousemove = function (e) {
@@ -79,6 +80,7 @@
 	    main.mousemove();
 	};
 	var mouseup = function (e) {
+	    main.mousePressed = false;
 	    main.mouseup();
 	};
 	var draw = function () {
@@ -143,9 +145,11 @@
 	    }
 	    Main.prototype.init = function () {
 	        var _this = this;
+	        this.hostoryH = [];
 	        Object.keys(this.len).forEach(function (k) { return _this.len[k] *= 4; });
 	    };
 	    Main.prototype.draw = function () {
+	        var _this = this;
 	        var pos = this.pos;
 	        var len = this.len;
 	        pos.A.x = this.size.width / 2;
@@ -154,7 +158,10 @@
 	        pos.D.x = pos.A.x + 38.0 * 4;
 	        pos.D.y = pos.A.y + 7.8 * 4;
 	        //
-	        this.cr += 0.05;
+	        if (this.mousePressed)
+	            this.cr = Math.atan2(this.mouse.y - pos.A.y, this.mouse.x - pos.A.x);
+	        else
+	            this.cr += 0.04;
 	        pos.B.x = Math.cos(this.cr) * len.AB + pos.A.x;
 	        pos.B.y = Math.sin(this.cr) * len.AB + pos.A.y;
 	        var bd = Math.sqrt((pos.B.x - pos.D.x) * (pos.B.x - pos.D.x) + (pos.B.y - pos.D.y) * (pos.B.y - pos.D.y));
@@ -189,9 +196,18 @@
 	        this.line(pos.F, pos.G);
 	        this.line(pos.G, pos.H);
 	        this.line(pos.E, pos.H);
+	        this.canvas.lineStyle();
+	        this.hostoryH.forEach(function (pos, id) {
+	            _this.canvas.beginFill(0xff0000, 0.2);
+	            _this.canvas.drawCircle(pos.x, pos.y, 2);
+	        });
+	        this.hostoryH.push(new Pos(pos.H.x, pos.H.y));
+	        if (this.hostoryH.length > 300) {
+	            this.hostoryH.shift();
+	        }
 	    };
 	    Main.prototype.addPos = function (x, y, name) {
-	        var pos = new Pos(x, y, name);
+	        var pos = new DebugPos(x, y, name);
 	        ;
 	        this.addChild(pos);
 	        return pos;
@@ -224,9 +240,9 @@
 	}(canvas_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
-	var Pos = (function (_super) {
-	    __extends(Pos, _super);
-	    function Pos(x, y, name) {
+	var DebugPos = (function (_super) {
+	    __extends(DebugPos, _super);
+	    function DebugPos(x, y, name) {
 	        var _this = _super.call(this) || this;
 	        _this.x = x;
 	        _this.y = y;
@@ -243,8 +259,17 @@
 	        _this.addChild(_this.marker);
 	        return _this;
 	    }
-	    return Pos;
+	    return DebugPos;
 	}(PIXI.Container));
+	var Pos = (function () {
+	    function Pos(x, y) {
+	        this.x = 0;
+	        this.y = 0;
+	        this.x = x;
+	        this.y = y;
+	    }
+	    return Pos;
+	}());
 
 
 /***/ },

@@ -1,6 +1,7 @@
 import Canvas from '../.src/canvas';
 export default class Main extends Canvas {
     private cr: number = 0;
+    private hostoryH: Pos[];
     private len = {
         AB: 15,
         BC: 50,
@@ -25,6 +26,7 @@ export default class Main extends Canvas {
         H: this.addPos(0, 0, "H")
     }
     public init() {
+        this.hostoryH = [];
         Object.keys(this.len).forEach((k) => this.len[k] *= 4);
     }
     public draw() {
@@ -39,7 +41,9 @@ export default class Main extends Canvas {
         pos.D.y = pos.A.y + 7.8 * 4;
         //
 
-        this.cr += 0.05;
+        if (this.mousePressed) this.cr = Math.atan2(this.mouse.y - pos.A.y, this.mouse.x - pos.A.x);
+        else this.cr += 0.04;
+
         pos.B.x = Math.cos(this.cr) * len.AB + pos.A.x;
         pos.B.y = Math.sin(this.cr) * len.AB + pos.A.y;
 
@@ -71,7 +75,7 @@ export default class Main extends Canvas {
         pos.H.y = Math.sin(feg + tr3 + geh) * len.EH + pos.E.y;
 
         this.canvas.clear();
-        
+
         this.line(pos.A, pos.B);
         this.line(pos.B, pos.C);
         this.line(pos.D, pos.C);
@@ -83,13 +87,23 @@ export default class Main extends Canvas {
         this.line(pos.F, pos.G);
         this.line(pos.G, pos.H);
         this.line(pos.E, pos.H);
+
+        this.canvas.lineStyle();
+        this.hostoryH.forEach((pos, id) => {
+            this.canvas.beginFill(0xff0000, 0.2);
+            this.canvas.drawCircle(pos.x, pos.y, 2);
+        });
+        this.hostoryH.push(new Pos(pos.H.x, pos.H.y));
+        if (this.hostoryH.length > 300) {
+            this.hostoryH.shift();
+        }
     }
-    public addPos(x: number, y: number, name: string): Pos {
-        const pos = new Pos(x, y, name);;
+    public addPos(x: number, y: number, name: string): DebugPos {
+        const pos = new DebugPos(x, y, name);;
         this.addChild(pos);
         return pos;
     }
-    public line(...pos: Pos[]) {
+    public line(...pos: DebugPos[]) {
         this.canvas.lineStyle(2, 0xCCCCCC);
         pos.forEach((p, id) => {
             if (id == 0) {
@@ -108,7 +122,7 @@ export default class Main extends Canvas {
     public resize(width: number, height: number) {
     }
 }
-class Pos extends PIXI.Container{
+class DebugPos extends PIXI.Container{
     private label: PIXI.Text;
     private marker: PIXI.Graphics;
     constructor(x: number, y: number, name: string) {
@@ -130,5 +144,13 @@ class Pos extends PIXI.Container{
         this.marker.drawCircle(0, 0, 5);
 
         this.addChild(this.marker);
+    }
+}
+class Pos {
+    public x: number = 0;
+    public y: number = 0;
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 }
