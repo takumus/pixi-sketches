@@ -16,6 +16,7 @@ const init = ()=> {
 	window.addEventListener('mouseup', mouseup);
 	window.addEventListener('mousemove', mousemove);
 	stage.addChild(main);
+	main.init();
 	draw();
 	resize();
 }

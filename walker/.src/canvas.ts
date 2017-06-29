@@ -9,7 +9,6 @@ export default class Canvas extends PIXI.Container {
         this.size = {width: 0, height: 0};
         this.canvas = new PIXI.Graphics();
         this.addChild(this.canvas);
-        this.init();
     }
     public init() {
     }
