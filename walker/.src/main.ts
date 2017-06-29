@@ -24,6 +24,7 @@ let ppos = 0;
 const mousedown = (e: MouseEvent) => {
 	main.mouse.x = e.clientX;
 	main.mouse.y = e.clientY;
+	main.mousePressed = true;
 	main.mousedown();
 }
 const mousemove = (e: MouseEvent) => {
@@ -32,6 +33,7 @@ const mousemove = (e: MouseEvent) => {
 	main.mousemove();
 }
 const mouseup = (e: MouseEvent) => {
+	main.mousePressed = false;
 	main.mouseup();
 }
 const draw = ()=> {
