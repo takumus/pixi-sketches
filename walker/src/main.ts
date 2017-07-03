@@ -1,7 +1,6 @@
 import Canvas from '../.src/canvas';
 export default class Main extends Canvas {
     private cr: number = 0;
-    private hostoryH: Pos[];
     private len = {
         AB: 15,
         BC: 50,
@@ -26,7 +25,6 @@ export default class Main extends Canvas {
         H: this.addPos(0, 0, "H")
     }
     public init() {
-        this.hostoryH = [];
         Object.keys(this.len).forEach((k) => this.len[k] *= 4);
     }
     public draw() {
@@ -87,16 +85,6 @@ export default class Main extends Canvas {
         this.line(pos.F, pos.G);
         this.line(pos.G, pos.H);
         this.line(pos.E, pos.H);
-
-        this.canvas.lineStyle();
-        this.hostoryH.forEach((pos, id) => {
-            this.canvas.beginFill(0xff0000, 0.2);
-            this.canvas.drawCircle(pos.x, pos.y, 2);
-        });
-        this.hostoryH.push(new Pos(pos.H.x, pos.H.y));
-        if (this.hostoryH.length > 300) {
-            this.hostoryH.shift();
-        }
     }
     public addPos(x: number, y: number, name: string): DebugPos {
         const pos = new DebugPos(x, y, name);;
