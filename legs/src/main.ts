@@ -7,18 +7,32 @@ export default class Main extends Canvas {
     private L = 15;
     public init() {
     }
-    public draw() {
+    public mousemove() {
         const np = new PosStack(
             this.mouse.x,
             this.mouse.y
         );
         if (this.posStack) {
+            if (np.distance(this.posStack) < 1) return;
             np.next = this.posStack;
             this.posStack = np;
         }
         this.posStack = np;
 
         this.canvas.clear();
+
+        this.canvas.lineStyle(1);
+        this.posStack.forEach((p, id) => {
+            if (id == 0) {
+                this.canvas.moveTo(p.x, p.y);
+                console.log(p);
+            }else {
+                this.canvas.lineTo(p.x, p.y);
+            }
+            return true;
+        });
+        this.canvas.lineStyle();
+
         let pp: PosStack = this.posStack;
         let tp: Pos = this.posStack;
         for (let i = 0; i < this.L; i ++) {
@@ -37,6 +51,7 @@ export default class Main extends Canvas {
                     );
                     this.canvas.beginFill(0xCCCCCC);
                     this.canvas.drawCircle(tp.x, tp.y, 5);
+                    this.canvas.endFill();
                     nd = this.D;
                     return false;
                 }else {
@@ -53,8 +68,6 @@ export default class Main extends Canvas {
     public mousedown() {
     }
     public mouseup() {
-    }
-    public mousemove() {
     }
     public resize(width: number, height: number) {
     }

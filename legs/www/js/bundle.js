@@ -123,15 +123,29 @@
 	    }
 	    Main.prototype.init = function () {
 	    };
-	    Main.prototype.draw = function () {
+	    Main.prototype.mousemove = function () {
 	        var _this = this;
 	        var np = new PosStack(this.mouse.x, this.mouse.y);
 	        if (this.posStack) {
+	            if (np.distance(this.posStack) < 1)
+	                return;
 	            np.next = this.posStack;
 	            this.posStack = np;
 	        }
 	        this.posStack = np;
 	        this.canvas.clear();
+	        this.canvas.lineStyle(1);
+	        this.posStack.forEach(function (p, id) {
+	            if (id == 0) {
+	                _this.canvas.moveTo(p.x, p.y);
+	                console.log(p);
+	            }
+	            else {
+	                _this.canvas.lineTo(p.x, p.y);
+	            }
+	            return true;
+	        });
+	        this.canvas.lineStyle();
 	        var pp = this.posStack;
 	        var tp = this.posStack;
 	        var _loop_1 = function (i) {
@@ -148,6 +162,7 @@
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
 	                    _this.canvas.beginFill(0xCCCCCC);
 	                    _this.canvas.drawCircle(tp.x, tp.y, 5);
+	                    _this.canvas.endFill();
 	                    nd = _this.D;
 	                    return false;
 	                }
@@ -169,8 +184,6 @@
 	    Main.prototype.mousedown = function () {
 	    };
 	    Main.prototype.mouseup = function () {
-	    };
-	    Main.prototype.mousemove = function () {
 	    };
 	    Main.prototype.resize = function (width, height) {
 	    };
