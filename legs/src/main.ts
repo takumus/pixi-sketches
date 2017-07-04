@@ -3,7 +3,7 @@ export default class Main extends Canvas {
     private interval: number = 10;
     private posStack: PosStack;
 
-    private D = 60;
+    private D = 120;
     private L = 15;
     public init() {
     }

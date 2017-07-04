@@ -117,7 +117,7 @@
 	    function Main() {
 	        var _this = _super !== null && _super.apply(this, arguments) || this;
 	        _this.interval = 10;
-	        _this.D = 60;
+	        _this.D = 120;
 	        _this.L = 15;
 	        return _this;
 	    }
