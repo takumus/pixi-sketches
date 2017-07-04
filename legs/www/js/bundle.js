@@ -117,82 +117,57 @@
 	    function Main() {
 	        var _this = _super !== null && _super.apply(this, arguments) || this;
 	        _this.interval = 10;
+	        _this.D = 30;
+	        _this.L = 15;
 	        return _this;
 	    }
 	    Main.prototype.init = function () {
-	        this.poses2 = [];
 	    };
 	    Main.prototype.draw = function () {
+	        var _this = this;
+	        var np = new PosStack(this.mouse.x, this.mouse.y);
+	        if (this.posStack) {
+	            np.next = this.posStack;
+	            this.posStack = np;
+	        }
+	        this.posStack = np;
+	        this.canvas.clear();
+	        var pp = this.posStack;
+	        var tp = this.posStack;
+	        var _loop_1 = function (i) {
+	            var ad = 0;
+	            var nd = this_1.D;
+	            pp.forEach(function (p, id) {
+	                if (id == 0)
+	                    return true;
+	                var dx = p.x - tp.x;
+	                var dy = p.y - tp.y;
+	                var d = Math.sqrt(dx * dx + dy * dy);
+	                ad += d;
+	                if (ad > _this.D) {
+	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
+	                    _this.canvas.beginFill(0x0000ff);
+	                    _this.canvas.drawCircle(tp.x, tp.y, 2);
+	                    nd = _this.D;
+	                    return false;
+	                }
+	                else {
+	                    pp = tp = p;
+	                    nd = _this.D - ad;
+	                }
+	                return true;
+	            });
+	        };
+	        var this_1 = this;
+	        for (var i = 0; i < this.L; i++) {
+	            _loop_1(i);
+	        }
 	    };
 	    Main.prototype.mousedown = function () {
 	    };
 	    Main.prototype.mouseup = function () {
 	    };
 	    Main.prototype.mousemove = function () {
-	        var _this = this;
-	        var mouse = new PosStack(this.mouse.x, this.mouse.y);
-	        if (!this.poses) {
-	            this.poses = mouse;
-	        }
-	        else {
-	            mouse.next = this.poses;
-	        }
-	        this.poses = mouse;
-	        var ni = 1;
-	        var fp = this.poses;
-	        var np = this.poses;
-	        var pp = fp;
-	        this.poses2 = [];
-	        var D = 50;
-	        var DD = D * D;
-	        var len = 10;
-	        var _loop_1 = function (i) {
-	            var add = 0;
-	            np.forEach(function (p, id) {
-	                var dx = p.x - pp.x;
-	                var dy = p.y - pp.y;
-	                var dd = dx * dx + dy * dy;
-	                pp = p;
-	                add += dd;
-	                if (add > DD) {
-	                    var d = Math.sqrt(dd);
-	                    var diff = Math.sqrt(add - DD);
-	                    var tx = p.x + dx / d * diff;
-	                    var ty = p.y + dy / d * diff;
-	                    pp = new Pos(tx, ty);
-	                    _this.poses2.push(pp.clone());
-	                    return false;
-	                }
-	                np = p;
-	                return true;
-	            });
-	        };
-	        for (var i = 0; i < len; i++) {
-	            _loop_1(i);
-	        }
-	        //if (np.next) np.next.next = null;
-	        this.canvas.clear();
-	        this.canvas.lineStyle(3, 0x666666);
-	        this.poses2.forEach(function (p, id) {
-	            if (id == 0) {
-	                _this.canvas.moveTo(p.x, p.y);
-	            }
-	            else {
-	                _this.canvas.lineTo(p.x, p.y);
-	            }
-	        });
-	        this.canvas.lineStyle();
-	        this.poses2.forEach(function (p, id) {
-	            _this.canvas.beginFill(0xCCCCCC);
-	            _this.canvas.drawCircle(p.x, p.y, 8);
-	            _this.canvas.endFill();
-	        });
-	        var idl = 0;
-	        this.poses.forEach(function (p, id) {
-	            idl = id;
-	            return true;
-	        });
-	        console.log(idl);
 	    };
 	    Main.prototype.resize = function (width, height) {
 	    };
