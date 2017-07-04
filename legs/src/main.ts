@@ -35,8 +35,8 @@ export default class Main extends Canvas {
                         tp.x + dx / d * nd,
                         tp.y + dy / d * nd
                     );
-                    this.canvas.beginFill(0x0000ff);
-                    this.canvas.drawCircle(tp.x, tp.y, 2);
+                    this.canvas.beginFill(0xCCCCCC);
+                    this.canvas.drawCircle(tp.x, tp.y, 5);
                     nd = this.D;
                     return false;
                 }else {
@@ -45,6 +45,9 @@ export default class Main extends Canvas {
                 }
                 return true;
             });
+        }
+        if (pp.next && pp.next.next) {
+            pp.next.next = null;
         }
     }
     public mousedown() {

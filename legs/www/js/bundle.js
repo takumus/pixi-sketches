@@ -146,8 +146,8 @@
 	                ad += d;
 	                if (ad > _this.D) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
-	                    _this.canvas.beginFill(0x0000ff);
-	                    _this.canvas.drawCircle(tp.x, tp.y, 2);
+	                    _this.canvas.beginFill(0xCCCCCC);
+	                    _this.canvas.drawCircle(tp.x, tp.y, 5);
 	                    nd = _this.D;
 	                    return false;
 	                }
@@ -161,6 +161,9 @@
 	        var this_1 = this;
 	        for (var i = 0; i < this.L; i++) {
 	            _loop_1(i);
+	        }
+	        if (pp.next && pp.next.next) {
+	            pp.next.next = null;
 	        }
 	    };
 	    Main.prototype.mousedown = function () {
