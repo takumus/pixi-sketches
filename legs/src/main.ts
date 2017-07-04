@@ -3,7 +3,7 @@ export default class Main extends Canvas {
     private interval: number = 10;
     private posStack: PosStack;
 
-    private D = 30;
+    private D = 60;
     private L = 15;
     public init() {
     }
@@ -23,7 +23,7 @@ export default class Main extends Canvas {
 
         this.canvas.clear();
 
-        this.canvas.lineStyle(1);
+        this.canvas.lineStyle(1, 0xCCCCCC);
         this.posStack.forEach((p, id) => {
             if (id == 0) {
                 this.canvas.moveTo(p.x, p.y);
@@ -50,7 +50,7 @@ export default class Main extends Canvas {
                         tp.x + dx / d * nd,
                         tp.y + dy / d * nd
                     );
-                    this.canvas.beginFill(0xCCCCCC);
+                    this.canvas.beginFill(0x000000);
                     this.canvas.drawCircle(tp.x, tp.y, 5);
                     this.canvas.endFill();
                     nd = this.D;

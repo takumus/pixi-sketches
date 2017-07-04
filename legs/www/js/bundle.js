@@ -117,7 +117,7 @@
 	    function Main() {
 	        var _this = _super !== null && _super.apply(this, arguments) || this;
 	        _this.interval = 10;
-	        _this.D = 30;
+	        _this.D = 60;
 	        _this.L = 15;
 	        return _this;
 	    }
@@ -136,7 +136,7 @@
 	            this.posStack = np;
 	        }
 	        this.canvas.clear();
-	        this.canvas.lineStyle(1);
+	        this.canvas.lineStyle(1, 0xCCCCCC);
 	        this.posStack.forEach(function (p, id) {
 	            if (id == 0) {
 	                _this.canvas.moveTo(p.x, p.y);
@@ -161,7 +161,7 @@
 	                ad += d;
 	                if (ad > _this.D) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
-	                    _this.canvas.beginFill(0xCCCCCC);
+	                    _this.canvas.beginFill(0x000000);
 	                    _this.canvas.drawCircle(tp.x, tp.y, 5);
 	                    _this.canvas.endFill();
 	                    nd = _this.D;
