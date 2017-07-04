@@ -123,22 +123,23 @@
 	    }
 	    Main.prototype.init = function () {
 	    };
-	    Main.prototype.mousemove = function () {
+	    Main.prototype.draw = function () {
 	        var _this = this;
 	        var np = new PosStack(this.mouse.x, this.mouse.y);
 	        if (this.posStack) {
-	            if (np.distance(this.posStack) < 1)
-	                return;
-	            np.next = this.posStack;
+	            if (np.distance(this.posStack) > 1) {
+	                np.next = this.posStack;
+	                this.posStack = np;
+	            }
+	        }
+	        else {
 	            this.posStack = np;
 	        }
-	        this.posStack = np;
 	        this.canvas.clear();
 	        this.canvas.lineStyle(1);
 	        this.posStack.forEach(function (p, id) {
 	            if (id == 0) {
 	                _this.canvas.moveTo(p.x, p.y);
-	                console.log(p);
 	            }
 	            else {
 	                _this.canvas.lineTo(p.x, p.y);

@@ -7,17 +7,19 @@ export default class Main extends Canvas {
     private L = 15;
     public init() {
     }
-    public mousemove() {
+    public draw() {
         const np = new PosStack(
             this.mouse.x,
             this.mouse.y
         );
         if (this.posStack) {
-            if (np.distance(this.posStack) < 1) return;
-            np.next = this.posStack;
+            if (np.distance(this.posStack) > 1) {
+                np.next = this.posStack;
+                this.posStack = np;
+            }
+        }else {
             this.posStack = np;
         }
-        this.posStack = np;
 
         this.canvas.clear();
 
@@ -25,7 +27,6 @@ export default class Main extends Canvas {
         this.posStack.forEach((p, id) => {
             if (id == 0) {
                 this.canvas.moveTo(p.x, p.y);
-                console.log(p);
             }else {
                 this.canvas.lineTo(p.x, p.y);
             }
