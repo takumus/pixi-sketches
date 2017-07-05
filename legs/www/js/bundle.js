@@ -59,29 +59,49 @@
 	    renderer.view.style.height = "100%";
 	    window.addEventListener("resize", resize);
 	    window.addEventListener('orientationchange', resize);
-	    window.addEventListener('mousedown', mousedown);
-	    window.addEventListener('mouseup', mouseup);
-	    window.addEventListener('mousemove', mousemove);
+	    window.addEventListener('mousedown', function (e) {
+	        main.mouse.x = e.clientX;
+	        main.mouse.y = e.clientY;
+	        main.mousePressed = true;
+	        main.mousedown();
+	    });
+	    window.addEventListener('mouseup', function (e) {
+	        main.mousePressed = false;
+	        main.mouseup();
+	    });
+	    window.addEventListener('mousemove', function (e) {
+	        main.mouse.x = e.clientX;
+	        main.mouse.y = e.clientY;
+	        main.mousemove();
+	    });
+	    window.addEventListener('touchstart', function (e) {
+	        main.mouse.x = e.touches[0].clientX;
+	        main.mouse.y = e.touches[0].clientY;
+	        main.mousePressed = true;
+	        main.mousedown();
+	    });
+	    window.addEventListener('touchmove', function (e) {
+	        main.mouse.x = e.touches[0].clientX;
+	        main.mouse.y = e.touches[0].clientY;
+	        main.mousemove();
+	    });
+	    window.addEventListener('touchend', function (e) {
+	        if (e.touches.length > 0)
+	            return;
+	        main.mousePressed = false;
+	        main.mouseup();
+	    });
+	    window.addEventListener('touchcancel', function (e) {
+	        if (e.touches.length > 0)
+	            return;
+	        main.mousePressed = false;
+	        main.mouseup();
+	    });
 	    stage.addChild(main);
 	    draw();
 	    resize();
 	};
 	var ppos = 0;
-	var mousedown = function (e) {
-	    main.mouse.x = e.clientX;
-	    main.mouse.y = e.clientY;
-	    main.mousePressed = true;
-	    main.mousedown();
-	};
-	var mousemove = function (e) {
-	    main.mouse.x = e.clientX;
-	    main.mouse.y = e.clientY;
-	    main.mousemove();
-	};
-	var mouseup = function (e) {
-	    main.mousePressed = false;
-	    main.mouseup();
-	};
 	var draw = function () {
 	    requestAnimationFrame(draw);
 	    main.draw();

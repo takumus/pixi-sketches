@@ -12,29 +12,49 @@ const init = ()=> {
 	renderer.view.style.height = "100%";
 	window.addEventListener("resize", resize);
 	window.addEventListener('orientationchange', resize);
-	window.addEventListener('mousedown', mousedown);
-	window.addEventListener('mouseup', mouseup);
-	window.addEventListener('mousemove', mousemove);
+	window.addEventListener('mousedown', (e: MouseEvent) => {
+		main.mouse.x = e.clientX;
+		main.mouse.y = e.clientY;
+		main.mousePressed = true;
+		main.mousedown();
+	});
+	window.addEventListener('mouseup', (e: MouseEvent) => {
+		main.mousePressed = false;
+		main.mouseup();
+	});
+	window.addEventListener('mousemove', (e: MouseEvent) => {
+		main.mouse.x = e.clientX;
+		main.mouse.y = e.clientY;
+		main.mousemove();
+	});
+
+	window.addEventListener('touchstart', (e: TouchEvent) => {
+		main.mouse.x = e.touches[0].clientX;
+		main.mouse.y = e.touches[0].clientY;
+		main.mousePressed = true;
+		main.mousedown();
+	});
+	window.addEventListener('touchmove', (e: TouchEvent) => {
+		main.mouse.x = e.touches[0].clientX;
+		main.mouse.y = e.touches[0].clientY;
+		main.mousemove();
+	});
+	window.addEventListener('touchend', (e: TouchEvent) => {
+		if (e.touches.length > 0) return;
+		main.mousePressed = false;
+		main.mouseup();
+	});
+	window.addEventListener('touchcancel', (e: TouchEvent) => {
+		if (e.touches.length > 0) return;
+		main.mousePressed = false;
+		main.mouseup();
+	});
+
 	stage.addChild(main);
 	draw();
 	resize();
 }
 let ppos = 0;
-const mousedown = (e: MouseEvent) => {
-	main.mouse.x = e.clientX;
-	main.mouse.y = e.clientY;
-	main.mousePressed = true;
-	main.mousedown();
-}
-const mousemove = (e: MouseEvent) => {
-	main.mouse.x = e.clientX;
-	main.mouse.y = e.clientY;
-	main.mousemove();
-}
-const mouseup = (e: MouseEvent) => {
-	main.mousePressed = false;
-	main.mouseup();
-}
 const draw = ()=> {
 	requestAnimationFrame(draw);
 	main.draw();
