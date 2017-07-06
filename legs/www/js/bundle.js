@@ -139,6 +139,7 @@
 	        _this.interval = 10;
 	        _this.D = 120;
 	        _this.L = 15;
+	        _this.d = 0;
 	        return _this;
 	    }
 	    Main.prototype.init = function () {
@@ -148,6 +149,7 @@
 	        var np = new PosStack(this.mouse.x, this.mouse.y);
 	        if (this.posStack) {
 	            if (np.distance(this.posStack) > 1) {
+	                this.d += np.distance(this.posStack);
 	                np.next = this.posStack;
 	                this.posStack = np;
 	            }
@@ -155,6 +157,9 @@
 	        else {
 	            this.posStack = np;
 	        }
+	        var stepInterval = 200;
+	        var step = this.d % 200;
+	        var halfStep = step % 100;
 	        this.canvas.clear();
 	        this.canvas.lineStyle(1, 0xCCCCCC);
 	        this.posStack.forEach(function (p, id) {

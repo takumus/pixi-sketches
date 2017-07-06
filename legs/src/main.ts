@@ -5,6 +5,8 @@ export default class Main extends Canvas {
 
     private D = 120;
     private L = 15;
+
+    private d: number = 0;
     public init() {
     }
     public draw() {
@@ -14,12 +16,17 @@ export default class Main extends Canvas {
         );
         if (this.posStack) {
             if (np.distance(this.posStack) > 1) {
+                this.d += np.distance(this.posStack);
                 np.next = this.posStack;
                 this.posStack = np;
             }
         }else {
             this.posStack = np;
         }
+
+        const stepInterval = 200;
+        const step = this.d % 200;
+        const halfStep = step % 100;
 
         this.canvas.clear();
 
