@@ -7,6 +7,8 @@ export default class Main extends Canvas {
     private L = 15;
 
     private d: number = 0;
+
+    private joints: Pos[];
     public init() {
     }
     public draw() {
@@ -23,10 +25,7 @@ export default class Main extends Canvas {
         }else {
             this.posStack = np;
         }
-
-        const stepInterval = 200;
-        const step = this.d % 200;
-        const halfStep = step % 100;
+        this.joints = [];
 
         this.canvas.clear();
 
@@ -59,6 +58,7 @@ export default class Main extends Canvas {
                     );
                     this.canvas.beginFill(0x000000);
                     this.canvas.drawCircle(tp.x, tp.y, 5);
+                    this.joints.push(tp.clone());
                     this.canvas.endFill();
                     nd = this.D;
                     return false;
@@ -72,6 +72,13 @@ export default class Main extends Canvas {
         if (pp.next && pp.next.next) {
             pp.next.next = null;
         }
+
+        const stepInterval = 200;
+        const stepIntervalHalf = stepInterval / 2;
+        const step = this.d % stepInterval;
+        const halfStep = step % stepIntervalHalf;
+        
+        console.log(Math.floor(this.d / stepInterval), halfStep);
     }
     public mousedown() {
     }

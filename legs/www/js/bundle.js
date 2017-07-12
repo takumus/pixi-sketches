@@ -157,9 +157,7 @@
 	        else {
 	            this.posStack = np;
 	        }
-	        var stepInterval = 200;
-	        var step = this.d % 200;
-	        var halfStep = step % 100;
+	        this.joints = [];
 	        this.canvas.clear();
 	        this.canvas.lineStyle(1, 0xCCCCCC);
 	        this.posStack.forEach(function (p, id) {
@@ -188,6 +186,7 @@
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
 	                    _this.canvas.beginFill(0x000000);
 	                    _this.canvas.drawCircle(tp.x, tp.y, 5);
+	                    _this.joints.push(tp.clone());
 	                    _this.canvas.endFill();
 	                    nd = _this.D;
 	                    return false;
@@ -206,6 +205,11 @@
 	        if (pp.next && pp.next.next) {
 	            pp.next.next = null;
 	        }
+	        var stepInterval = 200;
+	        var stepIntervalHalf = stepInterval / 2;
+	        var step = this.d % stepInterval;
+	        var halfStep = step % stepIntervalHalf;
+	        console.log(Math.floor(this.d / stepInterval), halfStep);
 	    };
 	    Main.prototype.mousedown = function () {
 	    };
