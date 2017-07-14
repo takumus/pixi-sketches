@@ -137,12 +137,15 @@
 	    function Main() {
 	        var _this = _super !== null && _super.apply(this, arguments) || this;
 	        _this.interval = 10;
-	        _this.D = 120;
-	        _this.L = 15;
+	        _this.D = 8;
+	        _this.L = 150;
 	        _this.d = 0;
+	        _this.sid = 0;
 	        return _this;
 	    }
 	    Main.prototype.init = function () {
+	        this.canvas2 = new PIXI.Graphics();
+	        this.addChild(this.canvas2);
 	    };
 	    Main.prototype.draw = function () {
 	        var _this = this;
@@ -172,6 +175,7 @@
 	        this.canvas.lineStyle();
 	        var pp = this.posStack;
 	        var tp = this.posStack;
+	        var body = [];
 	        var _loop_1 = function (i) {
 	            var ad = 0;
 	            var nd = this_1.D;
@@ -185,8 +189,9 @@
 	                if (ad > _this.D) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
 	                    _this.canvas.beginFill(0x000000);
-	                    _this.canvas.drawCircle(tp.x, tp.y, 5);
+	                    _this.canvas.drawCircle(tp.x, tp.y, 2);
 	                    _this.joints.push(tp.clone());
+	                    body.push(tp.clone());
 	                    _this.canvas.endFill();
 	                    nd = _this.D;
 	                    return false;
@@ -209,7 +214,15 @@
 	        var stepIntervalHalf = stepInterval / 2;
 	        var step = this.d % stepInterval;
 	        var halfStep = step % stepIntervalHalf;
-	        console.log(Math.floor(this.d / stepInterval), halfStep);
+	        var sid = Math.floor(this.d / stepInterval);
+	        if (this.sid != sid) {
+	            this.sid = sid;
+	            console.log(step);
+	            this.canvas2.clear();
+	            this.canvas2.beginFill(0xff0000);
+	            var id = Math.floor(step / this.D);
+	            this.canvas2.drawCircle(body[id].x, body[id].y, 10);
+	        }
 	    };
 	    Main.prototype.mousedown = function () {
 	    };

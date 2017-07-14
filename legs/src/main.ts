@@ -3,13 +3,17 @@ export default class Main extends Canvas {
     private interval: number = 10;
     private posStack: PosStack;
 
-    private D = 120;
-    private L = 15;
+    private D = 8;
+    private L = 150;
 
     private d: number = 0;
 
     private joints: Pos[];
+    private sid: number = 0;
+    private canvas2: PIXI.Graphics;
     public init() {
+        this.canvas2 = new PIXI.Graphics();
+        this.addChild(this.canvas2);
     }
     public draw() {
         const np = new PosStack(
@@ -42,6 +46,7 @@ export default class Main extends Canvas {
 
         let pp: PosStack = this.posStack;
         let tp: Pos = this.posStack;
+        const body: Pos[] = [];
         for (let i = 0; i < this.L; i ++) {
             let ad = 0;
             let nd = this.D;
@@ -57,8 +62,9 @@ export default class Main extends Canvas {
                         tp.y + dy / d * nd
                     );
                     this.canvas.beginFill(0x000000);
-                    this.canvas.drawCircle(tp.x, tp.y, 5);
+                    this.canvas.drawCircle(tp.x, tp.y, 2);
                     this.joints.push(tp.clone());
+                    body.push(tp.clone());
                     this.canvas.endFill();
                     nd = this.D;
                     return false;
@@ -77,8 +83,16 @@ export default class Main extends Canvas {
         const stepIntervalHalf = stepInterval / 2;
         const step = this.d % stepInterval;
         const halfStep = step % stepIntervalHalf;
-        
-        console.log(Math.floor(this.d / stepInterval), halfStep);
+        const sid = Math.floor(this.d / stepInterval);
+        if (this.sid != sid) {
+            this.sid = sid;
+            console.log(step);
+            this.canvas2.clear();
+            this.canvas2.beginFill(0xff0000);
+            const id = Math.floor(step / this.D);
+            this.canvas2.drawCircle(body[id].x, body[id].y, 10);
+
+        }
     }
     public mousedown() {
     }
