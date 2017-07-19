@@ -28,12 +28,14 @@ class Body extends PIXI.Container {
     public bone: Pos[];
 
     private leg: Leg;
+    private leg2: Leg;
     constructor() {
         super();
         this.canvas = new PIXI.Graphics();
         this.addChild(this.canvas);
         this.leg = new Leg(this, 200, this.D);
-        this.addChild(this.leg);
+        this.leg2 = new Leg(this, 200, this.D);
+        this.addChild(this.leg, this.leg2);
     }
     public setHead(pos: Pos) {
         const np = new PosStack(
@@ -99,6 +101,7 @@ class Body extends PIXI.Container {
             pp.next.next = null;
         }
         this.leg.setMoveDistance(this.d);
+        this.leg2.setMoveDistance(this.d + 100);
     }
 }
 class Leg extends PIXI.Graphics {
@@ -107,6 +110,7 @@ class Leg extends PIXI.Graphics {
     private sid: number = 0;
     private boneDistance: number;
     private body: Body;
+    private c: number = Math.random() * 0xffffff;
     constructor(body: Body, stepDistance: number, boneDistance: number) {
         super();
         this.setBody(body);
@@ -130,7 +134,7 @@ class Leg extends PIXI.Graphics {
         if (this.sid != sid) {
             this.sid = sid;
             this.clear();
-            this.beginFill(0xff0000);
+            this.beginFill(this.c);
             const id = Math.floor(step / this.boneDistance);
             this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
         }

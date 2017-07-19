@@ -165,7 +165,8 @@
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
 	        _this.leg = new Leg(_this, 200, _this.D);
-	        _this.addChild(_this.leg);
+	        _this.leg2 = new Leg(_this, 200, _this.D);
+	        _this.addChild(_this.leg, _this.leg2);
 	        return _this;
 	    }
 	    Body.prototype.setHead = function (pos) {
@@ -232,6 +233,7 @@
 	            pp.next.next = null;
 	        }
 	        this.leg.setMoveDistance(this.d);
+	        this.leg2.setMoveDistance(this.d + 100);
 	    };
 	    return Body;
 	}(PIXI.Container));
@@ -240,6 +242,7 @@
 	    function Leg(body, stepDistance, boneDistance) {
 	        var _this = _super.call(this) || this;
 	        _this.sid = 0;
+	        _this.c = Math.random() * 0xffffff;
 	        _this.setBody(body);
 	        _this.setStepDistance(stepDistance);
 	        _this.setBoneDistance(boneDistance);
@@ -262,7 +265,7 @@
 	        if (this.sid != sid) {
 	            this.sid = sid;
 	            this.clear();
-	            this.beginFill(0xff0000);
+	            this.beginFill(this.c);
 	            var id = Math.floor(step / this.boneDistance);
 	            this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
 	        }
