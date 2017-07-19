@@ -135,21 +135,42 @@
 	var Main = (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
-	        var _this = _super !== null && _super.apply(this, arguments) || this;
-	        _this.interval = 10;
-	        _this.D = 8;
-	        _this.L = 150;
-	        _this.d = 0;
-	        _this.sid = 0;
-	        return _this;
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
 	    Main.prototype.init = function () {
-	        this.canvas2 = new PIXI.Graphics();
-	        this.addChild(this.canvas2);
+	        this.body = new Body();
+	        this.addChild(this.body);
+	    };
+	    Main.prototype.mousedown = function () {
+	    };
+	    Main.prototype.mouseup = function () {
 	    };
 	    Main.prototype.draw = function () {
+	        this.body.setHead(new Pos(this.mouse.x, this.mouse.y));
+	    };
+	    Main.prototype.resize = function (width, height) {
+	    };
+	    return Main;
+	}(canvas_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Main;
+	var Body = (function (_super) {
+	    __extends(Body, _super);
+	    function Body() {
+	        var _this = _super.call(this) || this;
+	        _this.interval = 10;
+	        _this.D = 30;
+	        _this.L = 20;
+	        _this.d = 0;
+	        _this.canvas = new PIXI.Graphics();
+	        _this.addChild(_this.canvas);
+	        _this.leg = new Leg(_this, 200, _this.D);
+	        _this.addChild(_this.leg);
+	        return _this;
+	    }
+	    Body.prototype.setHead = function (pos) {
 	        var _this = this;
-	        var np = new PosStack(this.mouse.x, this.mouse.y);
+	        var np = new PosStack(pos.x, pos.y);
 	        if (this.posStack) {
 	            if (np.distance(this.posStack) > 1) {
 	                this.d += np.distance(this.posStack);
@@ -160,7 +181,7 @@
 	        else {
 	            this.posStack = np;
 	        }
-	        this.joints = [];
+	        this.bone = [];
 	        this.canvas.clear();
 	        this.canvas.lineStyle(1, 0xCCCCCC);
 	        this.posStack.forEach(function (p, id) {
@@ -190,7 +211,7 @@
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
 	                    _this.canvas.beginFill(0x000000);
 	                    _this.canvas.drawCircle(tp.x, tp.y, 2);
-	                    _this.joints.push(tp.clone());
+	                    _this.bone.push(tp.clone());
 	                    body.push(tp.clone());
 	                    _this.canvas.endFill();
 	                    nd = _this.D;
@@ -210,30 +231,45 @@
 	        if (pp.next && pp.next.next) {
 	            pp.next.next = null;
 	        }
-	        var stepInterval = 200;
-	        var stepIntervalHalf = stepInterval / 2;
-	        var step = this.d % stepInterval;
-	        var halfStep = step % stepIntervalHalf;
-	        var sid = Math.floor(this.d / stepInterval);
+	        this.leg.setMoveDistance(this.d);
+	    };
+	    return Body;
+	}(PIXI.Container));
+	var Leg = (function (_super) {
+	    __extends(Leg, _super);
+	    function Leg(body, stepDistance, boneDistance) {
+	        var _this = _super.call(this) || this;
+	        _this.sid = 0;
+	        _this.setBody(body);
+	        _this.setStepDistance(stepDistance);
+	        _this.setBoneDistance(boneDistance);
+	        return _this;
+	    }
+	    Leg.prototype.setBody = function (body) {
+	        this.body = body;
+	    };
+	    Leg.prototype.setStepDistance = function (stepDistance) {
+	        this.stepDistance = stepDistance;
+	        this.stepDistanceHalf = stepDistance / 2;
+	    };
+	    Leg.prototype.setBoneDistance = function (boneDistance) {
+	        this.boneDistance = boneDistance;
+	    };
+	    Leg.prototype.setMoveDistance = function (distance) {
+	        var step = distance % this.stepDistance;
+	        var halfStep = step % this.stepDistanceHalf;
+	        var sid = Math.floor(distance / this.stepDistance);
 	        if (this.sid != sid) {
 	            this.sid = sid;
-	            console.log(step);
-	            this.canvas2.clear();
-	            this.canvas2.beginFill(0xff0000);
-	            var id = Math.floor(step / this.D);
-	            this.canvas2.drawCircle(body[id].x, body[id].y, 10);
+	            this.clear();
+	            this.beginFill(0xff0000);
+	            var id = Math.floor(step / this.boneDistance);
+	            this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
 	        }
+	        console.log(step);
 	    };
-	    Main.prototype.mousedown = function () {
-	    };
-	    Main.prototype.mouseup = function () {
-	    };
-	    Main.prototype.resize = function (width, height) {
-	    };
-	    return Main;
-	}(canvas_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Main;
+	    return Leg;
+	}(PIXI.Graphics));
 	var Pos = (function () {
 	    function Pos(x, y) {
 	        this.x = x;

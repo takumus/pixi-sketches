@@ -1,24 +1,44 @@
 import Canvas from '../.src/canvas';
 export default class Main extends Canvas {
+    private body: Body;
+    public init() {
+        this.body = new Body();
+        this.addChild(this.body);
+    }
+    public mousedown() {
+    }
+    public mouseup() {
+    }
+    public draw() {
+        this.body.setHead(new Pos(this.mouse.x, this.mouse.y));
+    }
+    public resize(width: number, height: number) {
+    }
+}
+class Body extends PIXI.Container {
+    private canvas: PIXI.Graphics;
     private interval: number = 10;
     private posStack: PosStack;
 
-    private D = 8;
-    private L = 150;
+    private D = 30;
+    private L = 20;
 
     private d: number = 0;
 
-    private joints: Pos[];
-    private sid: number = 0;
-    private canvas2: PIXI.Graphics;
-    public init() {
-        this.canvas2 = new PIXI.Graphics();
-        this.addChild(this.canvas2);
+    public bone: Pos[];
+
+    private leg: Leg;
+    constructor() {
+        super();
+        this.canvas = new PIXI.Graphics();
+        this.addChild(this.canvas);
+        this.leg = new Leg(this, 200, this.D);
+        this.addChild(this.leg);
     }
-    public draw() {
+    public setHead(pos: Pos) {
         const np = new PosStack(
-            this.mouse.x,
-            this.mouse.y
+            pos.x,
+            pos.y
         );
         if (this.posStack) {
             if (np.distance(this.posStack) > 1) {
@@ -29,7 +49,7 @@ export default class Main extends Canvas {
         }else {
             this.posStack = np;
         }
-        this.joints = [];
+        this.bone = [];
 
         this.canvas.clear();
 
@@ -63,7 +83,7 @@ export default class Main extends Canvas {
                     );
                     this.canvas.beginFill(0x000000);
                     this.canvas.drawCircle(tp.x, tp.y, 2);
-                    this.joints.push(tp.clone());
+                    this.bone.push(tp.clone());
                     body.push(tp.clone());
                     this.canvas.endFill();
                     nd = this.D;
@@ -78,27 +98,43 @@ export default class Main extends Canvas {
         if (pp.next && pp.next.next) {
             pp.next.next = null;
         }
-
-        const stepInterval = 200;
-        const stepIntervalHalf = stepInterval / 2;
-        const step = this.d % stepInterval;
-        const halfStep = step % stepIntervalHalf;
-        const sid = Math.floor(this.d / stepInterval);
+        this.leg.setMoveDistance(this.d);
+    }
+}
+class Leg extends PIXI.Graphics {
+    private stepDistance: number;
+    private stepDistanceHalf: number;
+    private sid: number = 0;
+    private boneDistance: number;
+    private body: Body;
+    constructor(body: Body, stepDistance: number, boneDistance: number) {
+        super();
+        this.setBody(body);
+        this.setStepDistance(stepDistance);
+        this.setBoneDistance(boneDistance);
+    }
+    public setBody(body: Body): void {
+        this.body = body;
+    }
+    public setStepDistance(stepDistance: number): void {
+        this.stepDistance = stepDistance;
+        this.stepDistanceHalf = stepDistance / 2;
+    }
+    public setBoneDistance(boneDistance: number): void {
+        this.boneDistance = boneDistance;
+    }
+    public setMoveDistance(distance: number): void {
+        const step = distance % this.stepDistance;
+        const halfStep = step % this.stepDistanceHalf;
+        const sid = Math.floor(distance / this.stepDistance);
         if (this.sid != sid) {
             this.sid = sid;
-            console.log(step);
-            this.canvas2.clear();
-            this.canvas2.beginFill(0xff0000);
-            const id = Math.floor(step / this.D);
-            this.canvas2.drawCircle(body[id].x, body[id].y, 10);
-
+            this.clear();
+            this.beginFill(0xff0000);
+            const id = Math.floor(step / this.boneDistance);
+            this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
         }
-    }
-    public mousedown() {
-    }
-    public mouseup() {
-    }
-    public resize(width: number, height: number) {
+        console.log(step);
     }
 }
 class Pos {
