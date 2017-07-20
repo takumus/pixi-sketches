@@ -166,6 +166,8 @@
 	        _this.addChild(_this.canvas);
 	        _this.leg = new Leg(_this, 200, _this.D);
 	        _this.leg2 = new Leg(_this, 200, _this.D);
+	        _this.leg.setRootIndex(2);
+	        _this.leg2.setRootIndex(2);
 	        _this.addChild(_this.leg, _this.leg2);
 	        return _this;
 	    }
@@ -233,7 +235,7 @@
 	            pp.next.next = null;
 	        }
 	        this.leg.setMoveDistance(this.d);
-	        this.leg2.setMoveDistance(this.d + 100);
+	        //this.leg2.setMoveDistance(this.d + 100);
 	    };
 	    return Body;
 	}(PIXI.Container));
@@ -242,6 +244,7 @@
 	    function Leg(body, stepDistance, boneDistance) {
 	        var _this = _super.call(this) || this;
 	        _this.sid = 0;
+	        _this.sid2 = 0;
 	        _this.c = Math.random() * 0xffffff;
 	        _this.setBody(body);
 	        _this.setStepDistance(stepDistance);
@@ -258,18 +261,34 @@
 	    Leg.prototype.setBoneDistance = function (boneDistance) {
 	        this.boneDistance = boneDistance;
 	    };
+	    Leg.prototype.setRootIndex = function (id) {
+	        this.rootIndex = id;
+	    };
 	    Leg.prototype.setMoveDistance = function (distance) {
 	        var step = distance % this.stepDistance;
 	        var halfStep = step % this.stepDistanceHalf;
 	        var sid = Math.floor(distance / this.stepDistance);
 	        if (this.sid != sid) {
 	            this.sid = sid;
-	            this.clear();
-	            this.beginFill(this.c);
 	            var id = Math.floor(step / this.boneDistance);
-	            this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
+	            this.tp2 = this.tp ? this.tp.clone() : null;
+	            this.tp = this.body.bone[id].clone();
 	        }
-	        console.log(step);
+	        this.clear();
+	        if (this.tp) {
+	            this.beginFill(this.c);
+	            this.drawCircle(this.tp.x, this.tp.y, 10);
+	        }
+	        if (this.tp2) {
+	            this.beginFill(this.c);
+	            this.drawCircle(this.tp2.x, this.tp2.y, 20);
+	        }
+	        var p = this.body.bone[this.rootIndex];
+	        if (p) {
+	            this.beginFill(this.c);
+	            this.drawRect(this.body.bone[this.rootIndex].x - 5, this.body.bone[this.rootIndex].y - 5, 10, 10);
+	        }
+	        console.log(Math.floor(halfStep), Math.floor(step));
 	    };
 	    return Leg;
 	}(PIXI.Graphics));

@@ -35,6 +35,8 @@ class Body extends PIXI.Container {
         this.addChild(this.canvas);
         this.leg = new Leg(this, 200, this.D);
         this.leg2 = new Leg(this, 200, this.D);
+        this.leg.setRootIndex(2);
+        this.leg2.setRootIndex(2);
         this.addChild(this.leg, this.leg2);
     }
     public setHead(pos: Pos) {
@@ -101,16 +103,20 @@ class Body extends PIXI.Container {
             pp.next.next = null;
         }
         this.leg.setMoveDistance(this.d);
-        this.leg2.setMoveDistance(this.d + 100);
+        //this.leg2.setMoveDistance(this.d + 100);
     }
 }
 class Leg extends PIXI.Graphics {
     private stepDistance: number;
     private stepDistanceHalf: number;
     private sid: number = 0;
+    private sid2: number = 0;
     private boneDistance: number;
     private body: Body;
     private c: number = Math.random() * 0xffffff;
+    private rootIndex: number;
+    private tp: Pos;
+    private tp2: Pos;
     constructor(body: Body, stepDistance: number, boneDistance: number) {
         super();
         this.setBody(body);
@@ -127,18 +133,35 @@ class Leg extends PIXI.Graphics {
     public setBoneDistance(boneDistance: number): void {
         this.boneDistance = boneDistance;
     }
+    public setRootIndex(id: number): void {
+        this.rootIndex = id;
+    }
     public setMoveDistance(distance: number): void {
         const step = distance % this.stepDistance;
         const halfStep = step % this.stepDistanceHalf;
         const sid = Math.floor(distance / this.stepDistance);
         if (this.sid != sid) {
             this.sid = sid;
-            this.clear();
-            this.beginFill(this.c);
             const id = Math.floor(step / this.boneDistance);
-            this.drawCircle(this.body.bone[id].x, this.body.bone[id].y, 10);
+            this.tp2 = this.tp?this.tp.clone():null;
+            this.tp = this.body.bone[id].clone();
         }
-        console.log(step);
+        this.clear();
+        if (this.tp) {
+            this.beginFill(this.c);
+            this.drawCircle(this.tp.x, this.tp.y, 10);
+        }
+        if (this.tp2) {
+            this.beginFill(this.c);
+            this.drawCircle(this.tp2.x, this.tp2.y, 20);
+        }
+
+        const p = this.body.bone[this.rootIndex];
+        if (p) {
+            this.beginFill(this.c);
+            this.drawRect(this.body.bone[this.rootIndex].x - 5, this.body.bone[this.rootIndex].y - 5, 10, 10);
+        }
+        console.log(Math.floor(halfStep), Math.floor(step));
     }
 }
 class Pos {
