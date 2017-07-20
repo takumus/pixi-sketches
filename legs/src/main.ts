@@ -109,7 +109,7 @@ class Body extends PIXI.Container {
 class Leg extends PIXI.Graphics {
     private stepDistance: number;
     private stepDistanceHalf: number;
-    private sid: number = 0;
+    private step: number = 0;
     private sid2: number = 0;
     private boneDistance: number;
     private body: Body;
@@ -137,17 +137,18 @@ class Leg extends PIXI.Graphics {
         this.rootIndex = id;
     }
     public setMoveDistance(distance: number): void {
-        const step = distance % this.stepDistance;
-        const halfStep = step % this.stepDistanceHalf;
-        const sid = Math.floor(distance / this.stepDistance);
-        if (Math.abs(this.sid - sid) == 1) {
-            this.sid = sid;
-            const id = Math.floor(step / this.boneDistance);
+        const stepRate = distance % this.stepDistance;
+        const halfStepRate = stepRate % this.stepDistanceHalf;
+        const step = Math.floor(distance / this.stepDistance);
+        const diffStep = Math.abs(this.step - step);
+        if (diffStep == 1) {
+            this.step = step;
+            const id = Math.floor(stepRate / this.boneDistance);
             this.tp2 = this.tp?this.tp.clone():null;
             this.tp = this.body.bone[id].clone();
-        }else if (Math.abs(this.sid - sid) > 1) {
-            this.sid = sid;
-            const id = Math.floor(step / this.boneDistance);
+        }else if (diffStep > 1) {
+            this.step = step;
+            const id = Math.floor(stepRate / this.boneDistance);
             this.tp = this.body.bone[id].clone();
             const id2 = id + Math.floor(this.stepDistance / this.boneDistance);
             this.tp2 = this.body.bone[id2].clone();
@@ -167,7 +168,7 @@ class Leg extends PIXI.Graphics {
             this.beginFill(this.c);
             this.drawRect(this.body.bone[this.rootIndex].x - 5, this.body.bone[this.rootIndex].y - 5, 10, 10);
         }
-        console.log(Math.floor(halfStep), Math.floor(step));
+        console.log(Math.floor(halfStepRate), Math.floor(stepRate));
     }
 }
 class Pos {
