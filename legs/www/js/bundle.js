@@ -268,11 +268,18 @@
 	        var step = distance % this.stepDistance;
 	        var halfStep = step % this.stepDistanceHalf;
 	        var sid = Math.floor(distance / this.stepDistance);
-	        if (this.sid != sid) {
+	        if (Math.abs(this.sid - sid) == 1) {
 	            this.sid = sid;
 	            var id = Math.floor(step / this.boneDistance);
 	            this.tp2 = this.tp ? this.tp.clone() : null;
 	            this.tp = this.body.bone[id].clone();
+	        }
+	        else if (Math.abs(this.sid - sid) > 1) {
+	            this.sid = sid;
+	            var id = Math.floor(step / this.boneDistance);
+	            this.tp = this.body.bone[id].clone();
+	            var id2 = id + Math.floor(this.stepDistance / this.boneDistance);
+	            this.tp2 = this.body.bone[id2].clone();
 	        }
 	        this.clear();
 	        if (this.tp) {
