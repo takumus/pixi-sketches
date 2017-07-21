@@ -164,8 +164,8 @@
 	        _this.d = 0;
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        _this.leg = new Leg(_this, 200, _this.D);
-	        _this.leg2 = new Leg(_this, 200, _this.D);
+	        _this.leg = new Leg(_this, 100, _this.D, 1);
+	        _this.leg2 = new Leg(_this, 100, _this.D, -1);
 	        _this.leg.setRootIndex(2);
 	        _this.leg2.setRootIndex(2);
 	        _this.addChild(_this.leg, _this.leg2);
@@ -235,17 +235,18 @@
 	            pp.next.next = null;
 	        }
 	        this.leg.setMoveDistance(this.d);
-	        //this.leg2.setMoveDistance(this.d + 100);
+	        this.leg2.setMoveDistance(this.d + 50);
 	    };
 	    return Body;
 	}(PIXI.Container));
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
-	    function Leg(body, stepDistance, boneDistance) {
+	    function Leg(body, stepDistance, boneDistance, d) {
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
 	        _this.c = Math.random() * 0xffffff;
+	        _this.d = d;
 	        _this.nowPos = new Pos(0, 0);
 	        _this.nextPos = new Pos(0, 0);
 	        _this.prevPos = new Pos(0, 0);
@@ -275,15 +276,16 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.boneDistance);
-	            var nextPos = this.body.bone[nextId];
+	            var nextPos = this.getTargetPos(nextId, this.d, 50); //this.body.bone[nextId];
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.body.bone[nextId].copyTo(this.nextPos);
+	                this.nextPos = this.getTargetPos(nextId, this.d, 50);
+	                //this.body.bone[nextId].copyTo(this.nextPos);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
-	                this.body.bone[prevId].copyTo(this.prevPos);
+	                this.prevPos = this.getTargetPos(prevId, this.d, 50);
 	            }
 	        }
 	        this.clear();
@@ -291,9 +293,11 @@
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        var p = this.body.bone[this.rootIndex];
-	        if (p) {
-	        }
+	        //const p = this.body.bone[this.rootIndex];
+	        //if (p) {
+	        //this.beginFill(this.c * 0.2);
+	        //this.drawCircle(this.body.bone[this.rootIndex].x, this.body.bone[this.rootIndex].y, 10);
+	        //}
 	        this.lineStyle(1, this.c * 0.2);
 	        this.moveTo(this.prevPos.x, this.prevPos.y);
 	        this.lineTo(this.nextPos.x, this.nextPos.y);
@@ -303,6 +307,25 @@
 	        this.lineStyle();
 	        this.beginFill(this.c);
 	        this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
+	    };
+	    Leg.prototype.getTargetPos = function (id, d, length) {
+	        var bp = this.body.bone[id].clone();
+	        var fp = this.body.bone[id];
+	        var tp = this.body.bone[id - 1];
+	        if (!tp) {
+	            tp = fp;
+	            fp = this.body.bone[id + 1];
+	        }
+	        var ddx = tp.x - fp.x;
+	        var ddy = tp.y - fp.y;
+	        var D = Math.sqrt(ddx * ddx + ddy * ddy);
+	        var dx = ddx / D;
+	        var dy = ddy / D;
+	        var vx = (d < 0) ? -dy : dy;
+	        var vy = (d < 0) ? dx : -dx;
+	        bp.x += vx * length;
+	        bp.y += vy * length;
+	        return bp;
 	    };
 	    return Leg;
 	}(PIXI.Graphics));

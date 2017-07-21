@@ -33,8 +33,8 @@ class Body extends PIXI.Container {
         super();
         this.canvas = new PIXI.Graphics();
         this.addChild(this.canvas);
-        this.leg = new Leg(this, 200, this.D);
-        this.leg2 = new Leg(this, 200, this.D);
+        this.leg = new Leg(this, 100, this.D, 1);
+        this.leg2 = new Leg(this, 100, this.D, -1);
         this.leg.setRootIndex(2);
         this.leg2.setRootIndex(2);
         this.addChild(this.leg, this.leg2);
@@ -103,7 +103,7 @@ class Body extends PIXI.Container {
             pp.next.next = null;
         }
         this.leg.setMoveDistance(this.d);
-        //this.leg2.setMoveDistance(this.d + 100);
+        this.leg2.setMoveDistance(this.d + 50);
     }
 }
 class Leg extends PIXI.Graphics {
@@ -118,8 +118,10 @@ class Leg extends PIXI.Graphics {
     private nextPos: Pos;
     private prevPos: Pos;
     private nowPos: Pos;
-    constructor(body: Body, stepDistance: number, boneDistance: number) {
+    private d: number;
+    constructor(body: Body, stepDistance: number, boneDistance: number, d: number) {
         super();
+        this.d = d;
         this.nowPos = new Pos(0, 0);
         this.nextPos = new Pos(0, 0);
         this.prevPos = new Pos(0, 0);
@@ -148,14 +150,16 @@ class Leg extends PIXI.Graphics {
         if (diffStep > 0) {
             this.step = step;
             const nextId = Math.floor(stepRate / this.boneDistance);
-            const nextPos = this.body.bone[nextId];
+            const nextPos = this.getTargetPos(nextId, this.d, 50);//this.body.bone[nextId];
             if (diffStep == 1) {
                 this.nextPos.copyTo(this.prevPos);
                 nextPos.copyTo(this.nextPos);
             }else if (diffStep > 1) {
-                this.body.bone[nextId].copyTo(this.nextPos);
+                this.nextPos = this.getTargetPos(nextId, this.d, 50);
+                //this.body.bone[nextId].copyTo(this.nextPos);
                 const prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
-                this.body.bone[prevId].copyTo(this.prevPos);
+                this.prevPos = this.getTargetPos(prevId, this.d, 50);
+                //this.body.bone[prevId].copyTo(this.prevPos);
             }
         }
         this.clear();
@@ -164,11 +168,11 @@ class Leg extends PIXI.Graphics {
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 
-        const p = this.body.bone[this.rootIndex];
-        if (p) {
+        //const p = this.body.bone[this.rootIndex];
+        //if (p) {
             //this.beginFill(this.c * 0.2);
             //this.drawCircle(this.body.bone[this.rootIndex].x, this.body.bone[this.rootIndex].y, 10);
-        }
+        //}
         this.lineStyle(1, this.c * 0.2);
         this.moveTo(this.prevPos.x, this.prevPos.y);
         this.lineTo(this.nextPos.x, this.nextPos.y);
@@ -178,6 +182,25 @@ class Leg extends PIXI.Graphics {
         this.lineStyle();
         this.beginFill(this.c);
         this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
+    }
+    private getTargetPos(id: number, d: number, length: number): Pos {
+        const bp: Pos = this.body.bone[id].clone();
+        let fp: Pos = this.body.bone[id];
+        let tp: Pos = this.body.bone[id - 1];
+        if (!tp) {
+            tp = fp;
+            fp = this.body.bone[id + 1];
+        }
+        const ddx = tp.x - fp.x;
+        const ddy = tp.y - fp.y;
+        const D = Math.sqrt(ddx * ddx + ddy * ddy);
+        const dx = ddx / D;
+        const dy = ddy / D;
+        const vx = (d < 0) ? -dy : dy;
+        const vy = (d < 0) ? dx : -dx;
+        bp.x += vx * length;
+        bp.y += vy * length;
+        return bp;
     }
 }
 class Pos {
