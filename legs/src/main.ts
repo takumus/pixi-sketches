@@ -115,10 +115,14 @@ class Leg extends PIXI.Graphics {
     private body: Body;
     private c: number = Math.random() * 0xffffff;
     private rootIndex: number;
-    private tp: Pos;
-    private tp2: Pos;
+    private nextPos: Pos;
+    private prevPos: Pos;
+    private nowPos: Pos;
     constructor(body: Body, stepDistance: number, boneDistance: number) {
         super();
+        this.nowPos = new Pos(0, 0);
+        this.nextPos = new Pos(0, 0);
+        this.prevPos = new Pos(0, 0);
         this.setBody(body);
         this.setStepDistance(stepDistance);
         this.setBoneDistance(boneDistance);
@@ -141,34 +145,39 @@ class Leg extends PIXI.Graphics {
         const halfStepRate = stepRate % this.stepDistanceHalf;
         const step = Math.floor(distance / this.stepDistance);
         const diffStep = Math.abs(this.step - step);
-        if (diffStep == 1) {
+        if (diffStep > 0) {
             this.step = step;
-            const id = Math.floor(stepRate / this.boneDistance);
-            this.tp2 = this.tp?this.tp.clone():null;
-            this.tp = this.body.bone[id].clone();
-        }else if (diffStep > 1) {
-            this.step = step;
-            const id = Math.floor(stepRate / this.boneDistance);
-            this.tp = this.body.bone[id].clone();
-            const id2 = id + Math.floor(this.stepDistance / this.boneDistance);
-            this.tp2 = this.body.bone[id2].clone();
+            const nextId = Math.floor(stepRate / this.boneDistance);
+            const nextPos = this.body.bone[nextId];
+            if (diffStep == 1) {
+                this.nextPos.copyTo(this.prevPos);
+                nextPos.copyTo(this.nextPos);
+            }else if (diffStep > 1) {
+                this.body.bone[nextId].copyTo(this.nextPos);
+                const prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
+                this.body.bone[prevId].copyTo(this.prevPos);
+            }
         }
         this.clear();
-        if (this.tp) {
-            this.beginFill(this.c);
-            this.drawCircle(this.tp.x, this.tp.y, 10);
-        }
-        if (this.tp2) {
-            this.beginFill(this.c);
-            this.drawCircle(this.tp2.x, this.tp2.y, 20);
-        }
+        const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
+        const r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
+        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 
         const p = this.body.bone[this.rootIndex];
         if (p) {
-            this.beginFill(this.c);
-            this.drawRect(this.body.bone[this.rootIndex].x - 5, this.body.bone[this.rootIndex].y - 5, 10, 10);
+            //this.beginFill(this.c * 0.2);
+            //this.drawCircle(this.body.bone[this.rootIndex].x, this.body.bone[this.rootIndex].y, 10);
         }
-        console.log(Math.floor(halfStepRate), Math.floor(stepRate));
+        this.lineStyle(1, this.c * 0.2);
+        this.moveTo(this.prevPos.x, this.prevPos.y);
+        this.lineTo(this.nextPos.x, this.nextPos.y);
+        this.lineStyle(1, this.c);
+        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
+        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
+        this.lineStyle();
+        this.beginFill(this.c);
+        this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
     }
 }
 class Pos {
@@ -178,11 +187,15 @@ class Pos {
         this.x = x;
         this.y = y;
     }
+    public clone(): Pos {
+        return new Pos(this.x, this.y);
+    }
     public distance(pos: Pos): number {
         return Math.sqrt((pos.x - this.x) * (pos.x - this.x) + (pos.y - this.y) * (pos.y - this.y));
     }
-    public clone(): Pos {
-        return new Pos(this.x, this.y);
+    public copyTo(pos: Pos): void {
+        pos.x = this.x;
+        pos.y = this.y;
     }
 }
 class PosStack extends Pos {

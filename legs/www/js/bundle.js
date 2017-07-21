@@ -246,6 +246,9 @@
 	        _this.step = 0;
 	        _this.sid2 = 0;
 	        _this.c = Math.random() * 0xffffff;
+	        _this.nowPos = new Pos(0, 0);
+	        _this.nextPos = new Pos(0, 0);
+	        _this.prevPos = new Pos(0, 0);
 	        _this.setBody(body);
 	        _this.setStepDistance(stepDistance);
 	        _this.setBoneDistance(boneDistance);
@@ -269,34 +272,37 @@
 	        var halfStepRate = stepRate % this.stepDistanceHalf;
 	        var step = Math.floor(distance / this.stepDistance);
 	        var diffStep = Math.abs(this.step - step);
-	        if (diffStep == 1) {
+	        if (diffStep > 0) {
 	            this.step = step;
-	            var id = Math.floor(stepRate / this.boneDistance);
-	            this.tp2 = this.tp ? this.tp.clone() : null;
-	            this.tp = this.body.bone[id].clone();
-	        }
-	        else if (diffStep > 1) {
-	            this.step = step;
-	            var id = Math.floor(stepRate / this.boneDistance);
-	            this.tp = this.body.bone[id].clone();
-	            var id2 = id + Math.floor(this.stepDistance / this.boneDistance);
-	            this.tp2 = this.body.bone[id2].clone();
+	            var nextId = Math.floor(stepRate / this.boneDistance);
+	            var nextPos = this.body.bone[nextId];
+	            if (diffStep == 1) {
+	                this.nextPos.copyTo(this.prevPos);
+	                nextPos.copyTo(this.nextPos);
+	            }
+	            else if (diffStep > 1) {
+	                this.body.bone[nextId].copyTo(this.nextPos);
+	                var prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
+	                this.body.bone[prevId].copyTo(this.prevPos);
+	            }
 	        }
 	        this.clear();
-	        if (this.tp) {
-	            this.beginFill(this.c);
-	            this.drawCircle(this.tp.x, this.tp.y, 10);
-	        }
-	        if (this.tp2) {
-	            this.beginFill(this.c);
-	            this.drawCircle(this.tp2.x, this.tp2.y, 20);
-	        }
+	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
+	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
+	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 	        var p = this.body.bone[this.rootIndex];
 	        if (p) {
-	            this.beginFill(this.c);
-	            this.drawRect(this.body.bone[this.rootIndex].x - 5, this.body.bone[this.rootIndex].y - 5, 10, 10);
 	        }
-	        console.log(Math.floor(halfStepRate), Math.floor(stepRate));
+	        this.lineStyle(1, this.c * 0.2);
+	        this.moveTo(this.prevPos.x, this.prevPos.y);
+	        this.lineTo(this.nextPos.x, this.nextPos.y);
+	        this.lineStyle(1, this.c);
+	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
+	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
+	        this.lineStyle();
+	        this.beginFill(this.c);
+	        this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
 	    };
 	    return Leg;
 	}(PIXI.Graphics));
@@ -305,11 +311,15 @@
 	        this.x = x;
 	        this.y = y;
 	    }
+	    Pos.prototype.clone = function () {
+	        return new Pos(this.x, this.y);
+	    };
 	    Pos.prototype.distance = function (pos) {
 	        return Math.sqrt((pos.x - this.x) * (pos.x - this.x) + (pos.y - this.y) * (pos.y - this.y));
 	    };
-	    Pos.prototype.clone = function () {
-	        return new Pos(this.x, this.y);
+	    Pos.prototype.copyTo = function (pos) {
+	        pos.x = this.x;
+	        pos.y = this.y;
 	    };
 	    return Pos;
 	}());
