@@ -159,17 +159,17 @@
 	    function Body() {
 	        var _this = _super.call(this) || this;
 	        _this.interval = 10;
-	        _this.D = 30;
-	        _this.L = 20;
+	        _this.D = 18;
+	        _this.L = 30;
 	        _this.d = 0;
 	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        for (var i = 0; i < 14; i++) {
-	            var ox = 20 + i * 8;
-	            var oy = 70 + i * 8;
-	            _this.legs.push(new Leg(_this, 70, _this.D, i, i + 2, 1, ox));
-	            _this.legs.push(new Leg(_this, 70, _this.D, i, i + 2, -1, oy));
+	        for (var i = 0; i < 23; i++) {
+	            var ox = 0 + i * 6;
+	            var oy = 30 + i * 6;
+	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 2, 1, ox));
+	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 2, -1, oy));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -247,7 +247,7 @@
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
-	        _this.c = Math.random() * 0xffffff;
+	        _this.c = 0xff5500;
 	        _this.direction = direction;
 	        _this.nowPos = new Pos(0, 0);
 	        _this.nextPos = new Pos(0, 0);
@@ -288,21 +288,22 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.boneDistance) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.direction, 50); //this.body.bone[nextId];
+	            var nextPos = this.getTargetPos(nextId, this.direction, 30); //this.body.bone[nextId];
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.direction, 50);
+	                this.nextPos = this.getTargetPos(nextId, this.direction, 30);
 	                //this.body.bone[nextId].copyTo(this.nextPos);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
-	                this.prevPos = this.getTargetPos(prevId, this.direction, 50);
+	                this.prevPos = this.getTargetPos(prevId, this.direction, 30);
 	            }
 	        }
 	        this.clear();
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+	        //r = Math.pow(r, 2);
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 	        //this.lineStyle(1, this.c * 0.2);
@@ -313,7 +314,7 @@
 	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
 	        this.lineStyle();
 	        this.beginFill(this.c);
-	        this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
+	        this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
 	        var p = this.body.bone[this.rootIndex];
 	        if (p) {
 	            this.beginFill(this.c * 0.2);
