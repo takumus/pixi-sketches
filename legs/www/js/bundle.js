@@ -162,13 +162,16 @@
 	        _this.D = 30;
 	        _this.L = 20;
 	        _this.d = 0;
+	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        _this.leg = new Leg(_this, 100, _this.D, 1);
-	        _this.leg2 = new Leg(_this, 100, _this.D, -1);
-	        _this.leg.setRootIndex(2);
-	        _this.leg2.setRootIndex(2);
-	        _this.addChild(_this.leg, _this.leg2);
+	        for (var i = 0; i < 14; i++) {
+	            var ox = 20 + i * 8;
+	            var oy = 70 + i * 8;
+	            _this.legs.push(new Leg(_this, 70, _this.D, i, i + 2, 1, ox));
+	            _this.legs.push(new Leg(_this, 70, _this.D, i, i + 2, -1, oy));
+	        }
+	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
 	    Body.prototype.setHead = function (pos) {
@@ -234,25 +237,27 @@
 	        if (pp.next && pp.next.next) {
 	            pp.next.next = null;
 	        }
-	        this.leg.setMoveDistance(this.d);
-	        this.leg2.setMoveDistance(this.d + 50);
+	        this.legs.forEach(function (l) { return l.setMoveDistance(_this.d); });
 	    };
 	    return Body;
 	}(PIXI.Container));
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
-	    function Leg(body, stepDistance, boneDistance, d) {
+	    function Leg(body, stepDistance, boneDistance, targetRootIndex, rootIndex, direction, stepOffset) {
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
 	        _this.c = Math.random() * 0xffffff;
-	        _this.d = d;
+	        _this.direction = direction;
 	        _this.nowPos = new Pos(0, 0);
 	        _this.nextPos = new Pos(0, 0);
 	        _this.prevPos = new Pos(0, 0);
 	        _this.setBody(body);
 	        _this.setStepDistance(stepDistance);
 	        _this.setBoneDistance(boneDistance);
+	        _this.setTargetRootIndex(targetRootIndex);
+	        _this.setStepOffset(stepOffset);
+	        _this.setRootIndex(rootIndex);
 	        return _this;
 	    }
 	    Leg.prototype.setBody = function (body) {
@@ -265,27 +270,34 @@
 	    Leg.prototype.setBoneDistance = function (boneDistance) {
 	        this.boneDistance = boneDistance;
 	    };
+	    Leg.prototype.setTargetRootIndex = function (id) {
+	        this.targetRootIndex = id;
+	    };
 	    Leg.prototype.setRootIndex = function (id) {
 	        this.rootIndex = id;
 	    };
+	    Leg.prototype.setStepOffset = function (offset) {
+	        this.stepOffset = offset;
+	    };
 	    Leg.prototype.setMoveDistance = function (distance) {
+	        distance += this.stepOffset;
 	        var stepRate = distance % this.stepDistance;
 	        var halfStepRate = stepRate % this.stepDistanceHalf;
 	        var step = Math.floor(distance / this.stepDistance);
 	        var diffStep = Math.abs(this.step - step);
 	        if (diffStep > 0) {
 	            this.step = step;
-	            var nextId = Math.floor(stepRate / this.boneDistance);
-	            var nextPos = this.getTargetPos(nextId, this.d, 50); //this.body.bone[nextId];
+	            var nextId = Math.floor(stepRate / this.boneDistance) + this.targetRootIndex;
+	            var nextPos = this.getTargetPos(nextId, this.direction, 50); //this.body.bone[nextId];
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.d, 50);
+	                this.nextPos = this.getTargetPos(nextId, this.direction, 50);
 	                //this.body.bone[nextId].copyTo(this.nextPos);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
-	                this.prevPos = this.getTargetPos(prevId, this.d, 50);
+	                this.prevPos = this.getTargetPos(prevId, this.direction, 50);
 	            }
 	        }
 	        this.clear();
@@ -293,29 +305,34 @@
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        //const p = this.body.bone[this.rootIndex];
-	        //if (p) {
-	        //this.beginFill(this.c * 0.2);
-	        //this.drawCircle(this.body.bone[this.rootIndex].x, this.body.bone[this.rootIndex].y, 10);
-	        //}
-	        this.lineStyle(1, this.c * 0.2);
-	        this.moveTo(this.prevPos.x, this.prevPos.y);
-	        this.lineTo(this.nextPos.x, this.nextPos.y);
-	        this.lineStyle(1, this.c);
+	        //this.lineStyle(1, this.c * 0.2);
+	        //this.moveTo(this.prevPos.x, this.prevPos.y);
+	        //this.lineTo(this.nextPos.x, this.nextPos.y);
+	        //this.lineStyle(1, this.c);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
 	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
 	        this.lineStyle();
 	        this.beginFill(this.c);
 	        this.drawRect(this.nowPos.x - 5, this.nowPos.y - 5, 10, 10);
+	        var p = this.body.bone[this.rootIndex];
+	        if (p) {
+	            this.beginFill(this.c * 0.2);
+	            this.drawCircle(p.x, p.y, 10);
+	            this.lineStyle(1, this.c * 0.4);
+	            this.moveTo(p.x, p.y);
+	            this.lineTo(this.nowPos.x, this.nowPos.y);
+	        }
 	    };
 	    Leg.prototype.getTargetPos = function (id, d, length) {
-	        var bp = this.body.bone[id].clone();
+	        var bp = this.body.bone[id];
 	        var fp = this.body.bone[id];
 	        var tp = this.body.bone[id - 1];
 	        if (!tp) {
 	            tp = fp;
 	            fp = this.body.bone[id + 1];
 	        }
+	        if (!tp || !fp || !bp)
+	            return new Pos(0, 0);
 	        var ddx = tp.x - fp.x;
 	        var ddy = tp.y - fp.y;
 	        var D = Math.sqrt(ddx * ddx + ddy * ddy);
@@ -323,6 +340,7 @@
 	        var dy = ddy / D;
 	        var vx = (d < 0) ? -dy : dy;
 	        var vy = (d < 0) ? dx : -dx;
+	        bp = bp.clone();
 	        bp.x += vx * length;
 	        bp.y += vy * length;
 	        return bp;
