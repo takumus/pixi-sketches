@@ -35,8 +35,8 @@ class Body extends PIXI.Container {
         for (let i = 0; i < 23; i ++) {
             const ox = 0 + i * 6;
             const oy = 30 + i * 6;
-            this.legs.push(new Leg(this, 60, this.D, i, i + 2, 1, ox));
-            this.legs.push(new Leg(this, 60, this.D, i, i + 2, -1, oy));
+            this.legs.push(new Leg(this, 60, this.D, i, i + 3, 1, ox));
+            this.legs.push(new Leg(this, 60, this.D, i, i + 3, -1, oy));
         }
         
         this.legs.forEach((o) => this.addChild(o));
@@ -202,10 +202,14 @@ class Leg extends PIXI.Graphics {
         const p = this.body.bone[this.rootIndex];
         if (p) {
             this.beginFill(this.c * 0.2);
-            this.drawCircle(p.x, p.y, 10);
+            this.drawCircle(p.x, p.y, 5);
             this.lineStyle(1, this.c * 0.4);
-            this.moveTo(p.x, p.y);
-            this.lineTo(this.nowPos.x, this.nowPos.y);
+            this.endFill();
+
+            const poses = BugLegs.getPos(p, this.nowPos, 25, 25, this.direction);
+            this.moveTo(poses.begin.x, poses.begin.y);
+            this.lineTo(poses.middle.x, poses.middle.y);
+            this.lineTo(poses.end.x, poses.end.y);
         }
     }
     private getTargetPos(id: number, d: number, length: number): Pos {
@@ -258,5 +262,35 @@ class PosStack extends Pos {
             p = p.next;
             id ++;
         }
+    }
+}
+
+class BugLegs {
+    public static getPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, d: number) {
+        //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
+        //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
+        //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
+
+        const r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
+        const a = fromPos.distance(toPos);
+        let b = l1;
+        let c = l2;
+        const minA = a * 1.02;
+        if (b + c < minA) {
+            const ratio = b / (b + c);
+            b = ratio * minA;
+            c = minA - b;
+        }
+        const ra = Math.acos((b * b + c * c - a * a) / (2 * b * c));
+        const rb = Math.acos((a * a + c * c - b * b) / (2 * a * c));
+        const rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+        const rr = r + (d < 0 ? rc : -rc);
+        const x = Math.cos(rr) * b + fromPos.x;
+        const y = Math.sin(rr) * b + fromPos.y;
+        return {
+            begin: fromPos.clone(),
+            middle: new Pos(x, y),
+            end: toPos.clone()
+        };
     }
 }

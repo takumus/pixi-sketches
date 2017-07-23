@@ -168,8 +168,8 @@
 	        for (var i = 0; i < 23; i++) {
 	            var ox = 0 + i * 6;
 	            var oy = 30 + i * 6;
-	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 2, 1, ox));
-	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 2, -1, oy));
+	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 3, 1, ox));
+	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 3, -1, oy));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -318,10 +318,13 @@
 	        var p = this.body.bone[this.rootIndex];
 	        if (p) {
 	            this.beginFill(this.c * 0.2);
-	            this.drawCircle(p.x, p.y, 10);
+	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
-	            this.moveTo(p.x, p.y);
-	            this.lineTo(this.nowPos.x, this.nowPos.y);
+	            this.endFill();
+	            var poses = BugLegs.getPos(p, this.nowPos, 25, 25, this.direction);
+	            this.moveTo(poses.begin.x, poses.begin.y);
+	            this.lineTo(poses.middle.x, poses.middle.y);
+	            this.lineTo(poses.end.x, poses.end.y);
 	        }
 	    };
 	    Leg.prototype.getTargetPos = function (id, d, length) {
@@ -382,6 +385,37 @@
 	    };
 	    return PosStack;
 	}(Pos));
+	var BugLegs = (function () {
+	    function BugLegs() {
+	    }
+	    BugLegs.getPos = function (fromPos, toPos, l1, l2, d) {
+	        //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
+	        //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
+	        //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
+	        var r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
+	        var a = fromPos.distance(toPos);
+	        var b = l1;
+	        var c = l2;
+	        var minA = a * 1.02;
+	        if (b + c < minA) {
+	            var ratio = b / (b + c);
+	            b = ratio * minA;
+	            c = minA - b;
+	        }
+	        var ra = Math.acos((b * b + c * c - a * a) / (2 * b * c));
+	        var rb = Math.acos((a * a + c * c - b * b) / (2 * a * c));
+	        var rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+	        var rr = r + (d < 0 ? rc : -rc);
+	        var x = Math.cos(rr) * b + fromPos.x;
+	        var y = Math.sin(rr) * b + fromPos.y;
+	        return {
+	            begin: fromPos.clone(),
+	            middle: new Pos(x, y),
+	            end: toPos.clone()
+	        };
+	    };
+	    return BugLegs;
+	}());
 
 
 /***/ },
