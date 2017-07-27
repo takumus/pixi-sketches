@@ -165,11 +165,14 @@
 	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        for (var i = 0; i < 23; i++) {
+	        for (var i = 0; i < 1; i++) {
+	            var freq = 80;
 	            var ox = 0 + i * 6;
-	            var oy = 30 + i * 6;
-	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 3, 1, ox));
-	            _this.legs.push(new Leg(_this, 60, _this.D, i, i + 3, -1, oy));
+	            var oy = freq / 2 + i * 6;
+	            var offset = Math.floor(freq * 1.3 / _this.D);
+	            var ri = i + 16;
+	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, 50, ox));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, 50, oy));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -243,61 +246,64 @@
 	}(PIXI.Container));
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
-	    function Leg(body, stepDistance, boneDistance, targetRootIndex, rootIndex, direction, stepOffset) {
+	    function Leg(body, stepDistance, targetRootIndex, rootIndex, direction, distanceFromRoot, stepOffset) {
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
 	        _this.c = 0xff5500;
-	        _this.direction = direction;
 	        _this.nowPos = new Pos(0, 0);
 	        _this.nextPos = new Pos(0, 0);
 	        _this.prevPos = new Pos(0, 0);
 	        _this.setBody(body);
+	        _this.setDirection(direction);
 	        _this.setStepDistance(stepDistance);
-	        _this.setBoneDistance(boneDistance);
+	        _this.setDistanceFromRoot(distanceFromRoot);
 	        _this.setTargetRootIndex(targetRootIndex);
 	        _this.setStepOffset(stepOffset);
 	        _this.setRootIndex(rootIndex);
 	        return _this;
 	    }
+	    Leg.prototype.setDistanceFromRoot = function (value) {
+	        this.distanceFromRoot = value;
+	    };
 	    Leg.prototype.setBody = function (body) {
 	        this.body = body;
 	    };
-	    Leg.prototype.setStepDistance = function (stepDistance) {
-	        this.stepDistance = stepDistance;
-	        this.stepDistanceHalf = stepDistance / 2;
-	    };
-	    Leg.prototype.setBoneDistance = function (boneDistance) {
-	        this.boneDistance = boneDistance;
+	    Leg.prototype.setStepDistance = function (value) {
+	        this.stepDistance = value;
+	        this.stepDistanceHalf = value / 2;
 	    };
 	    Leg.prototype.setTargetRootIndex = function (id) {
-	        this.targetRootIndex = id;
+	        this.targetRootIndex = Math.floor(id);
 	    };
 	    Leg.prototype.setRootIndex = function (id) {
-	        this.rootIndex = id;
+	        this.rootIndex = Math.floor(id);
 	    };
-	    Leg.prototype.setStepOffset = function (offset) {
-	        this.stepOffset = offset;
+	    Leg.prototype.setStepOffset = function (value) {
+	        this.stepOffset = Math.floor(value);
 	    };
-	    Leg.prototype.setMoveDistance = function (distance) {
-	        distance += this.stepOffset;
-	        var stepRate = distance % this.stepDistance;
+	    Leg.prototype.setDirection = function (value) {
+	        this.direction = Math.floor(value);
+	    };
+	    Leg.prototype.setMoveDistance = function (value) {
+	        value += this.stepOffset;
+	        var stepRate = value % this.stepDistance;
 	        var halfStepRate = stepRate % this.stepDistanceHalf;
-	        var step = Math.floor(distance / this.stepDistance);
+	        var step = Math.floor(value / this.stepDistance);
 	        var diffStep = Math.abs(this.step - step);
 	        if (diffStep > 0) {
 	            this.step = step;
-	            var nextId = Math.floor(stepRate / this.boneDistance) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.direction, 30); //this.body.bone[nextId];
+	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
+	            var nextPos = this.getTargetPos(nextId, this.direction, this.distanceFromRoot); //this.body.bone[nextId];
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.direction, 30);
+	                this.nextPos = this.getTargetPos(nextId, this.direction, this.distanceFromRoot);
 	                //this.body.bone[nextId].copyTo(this.nextPos);
-	                var prevId = nextId + Math.floor(this.stepDistance / this.boneDistance);
-	                this.prevPos = this.getTargetPos(prevId, this.direction, 30);
+	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
+	                this.prevPos = this.getTargetPos(prevId, this.direction, this.distanceFromRoot);
 	            }
 	        }
 	        this.clear();
@@ -306,10 +312,10 @@
 	        //r = Math.pow(r, 2);
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        //this.lineStyle(1, this.c * 0.2);
-	        //this.moveTo(this.prevPos.x, this.prevPos.y);
-	        //this.lineTo(this.nextPos.x, this.nextPos.y);
-	        //this.lineStyle(1, this.c);
+	        this.lineStyle(1, this.c * 0.2);
+	        this.moveTo(this.prevPos.x, this.prevPos.y);
+	        this.lineTo(this.nextPos.x, this.nextPos.y);
+	        this.lineStyle(1, this.c);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
 	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
 	        this.lineStyle();
@@ -321,7 +327,7 @@
 	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            var poses = BugLegs.getPos(p, this.nowPos, 25, 25, this.direction);
+	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, -this.direction);
 	            this.moveTo(poses.begin.x, poses.begin.y);
 	            this.lineTo(poses.middle.x, poses.middle.y);
 	            this.lineTo(poses.end.x, poses.end.y);
@@ -398,12 +404,9 @@
 	        var c = l2;
 	        var minA = a * 1.02;
 	        if (b + c < minA) {
-	            var ratio = b / (b + c);
-	            b = ratio * minA;
+	            b = c / (b + c) * minA;
 	            c = minA - b;
 	        }
-	        var ra = Math.acos((b * b + c * c - a * a) / (2 * b * c));
-	        var rb = Math.acos((a * a + c * c - b * b) / (2 * a * c));
 	        var rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
 	        var rr = r + (d < 0 ? rc : -rc);
 	        var x = Math.cos(rr) * b + fromPos.x;
