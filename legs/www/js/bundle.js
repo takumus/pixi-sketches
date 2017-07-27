@@ -171,8 +171,8 @@
 	            var oy = freq / 2 + i * 6;
 	            var offset = Math.floor(freq * 1.3 / _this.D);
 	            var ri = i + 16;
-	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, 50, ox));
-	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, 50, oy));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, 1, 50, ox));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, -1, 50, oy));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -246,7 +246,7 @@
 	}(PIXI.Container));
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
-	    function Leg(body, stepDistance, targetRootIndex, rootIndex, direction, distanceFromRoot, stepOffset) {
+	    function Leg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, distanceFromRoot, stepOffset) {
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
@@ -255,7 +255,8 @@
 	        _this.nextPos = new Pos(0, 0);
 	        _this.prevPos = new Pos(0, 0);
 	        _this.setBody(body);
-	        _this.setDirection(direction);
+	        _this.setDirectionLR(directionLR);
+	        _this.setDirectionFB(directionFB);
 	        _this.setStepDistance(stepDistance);
 	        _this.setDistanceFromRoot(distanceFromRoot);
 	        _this.setTargetRootIndex(targetRootIndex);
@@ -282,8 +283,11 @@
 	    Leg.prototype.setStepOffset = function (value) {
 	        this.stepOffset = Math.floor(value);
 	    };
-	    Leg.prototype.setDirection = function (value) {
-	        this.direction = Math.floor(value);
+	    Leg.prototype.setDirectionLR = function (value) {
+	        this.directionLR = Math.floor(value);
+	    };
+	    Leg.prototype.setDirectionFB = function (value) {
+	        this.directionFB = Math.floor(value);
 	    };
 	    Leg.prototype.setMoveDistance = function (value) {
 	        value += this.stepOffset;
@@ -294,16 +298,16 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.direction, this.distanceFromRoot); //this.body.bone[nextId];
+	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot); //this.body.bone[nextId];
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.direction, this.distanceFromRoot);
+	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
 	                //this.body.bone[nextId].copyTo(this.nextPos);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
-	                this.prevPos = this.getTargetPos(prevId, this.direction, this.distanceFromRoot);
+	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromRoot);
 	            }
 	        }
 	        this.clear();
@@ -327,7 +331,7 @@
 	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, -this.direction);
+	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, -this.directionLR);
 	            this.moveTo(poses.begin.x, poses.begin.y);
 	            this.lineTo(poses.middle.x, poses.middle.y);
 	            this.lineTo(poses.end.x, poses.end.y);
