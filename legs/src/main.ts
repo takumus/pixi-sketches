@@ -38,8 +38,8 @@ class Body extends PIXI.Container {
             const oy = freq/2 + i * 6;
             const offset = Math.floor(freq * 1.3 / this.D);
             const ri = i + 16;
-            this.legs.push(new Leg(this, freq, ri, ri , 1,  1, 50, ox));
-            this.legs.push(new Leg(this, freq, ri, ri, 1, -1, 50, oy));
+            this.legs.push(new Leg(this, freq, ri, ri, -1,  1, 50, ox));
+            this.legs.push(new Leg(this, freq, ri, ri, -1, -1, 50, oy));
         }
         
         this.legs.forEach((o) => this.addChild(o));
@@ -219,7 +219,7 @@ class Leg extends PIXI.Graphics {
             this.lineStyle(1, this.c * 0.4);
             this.endFill();
 
-            const poses = BugLegs.getPos(p, this.nowPos, 80, 60, -this.directionLR);
+            const poses = BugLegs.getPos(p, this.nowPos, 80, 60, this.directionFB, this.directionLR);
             this.moveTo(poses.begin.x, poses.begin.y);
             this.lineTo(poses.middle.x, poses.middle.y);
             this.lineTo(poses.end.x, poses.end.y);
@@ -279,7 +279,7 @@ class PosStack extends Pos {
 }
 
 class BugLegs {
-    public static getPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, d: number) {
+    public static getPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, fb: number, lr: number) {
         //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
         //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
         //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
@@ -294,7 +294,7 @@ class BugLegs {
             c = minA - b;
         }
         const rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
-        const rr = r + (d < 0 ? rc : -rc);
+        const rr = r + (fb * lr < 0 ? rc : -rc);
         const x = Math.cos(rr) * b + fromPos.x;
         const y = Math.sin(rr) * b + fromPos.y;
         return {

@@ -171,8 +171,8 @@
 	            var oy = freq / 2 + i * 6;
 	            var offset = Math.floor(freq * 1.3 / _this.D);
 	            var ri = i + 16;
-	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, 1, 50, ox));
-	            _this.legs.push(new Leg(_this, freq, ri, ri, 1, -1, 50, oy));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, 1, 50, ox));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, -1, 50, oy));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -331,7 +331,7 @@
 	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, -this.directionLR);
+	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, this.directionFB, this.directionLR);
 	            this.moveTo(poses.begin.x, poses.begin.y);
 	            this.lineTo(poses.middle.x, poses.middle.y);
 	            this.lineTo(poses.end.x, poses.end.y);
@@ -398,7 +398,7 @@
 	var BugLegs = (function () {
 	    function BugLegs() {
 	    }
-	    BugLegs.getPos = function (fromPos, toPos, l1, l2, d) {
+	    BugLegs.getPos = function (fromPos, toPos, l1, l2, fb, lr) {
 	        //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
 	        //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
 	        //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
@@ -412,7 +412,7 @@
 	            c = minA - b;
 	        }
 	        var rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
-	        var rr = r + (d < 0 ? rc : -rc);
+	        var rr = r + (fb * lr < 0 ? rc : -rc);
 	        var x = Math.cos(rr) * b + fromPos.x;
 	        var y = Math.sin(rr) * b + fromPos.y;
 	        return {
