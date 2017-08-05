@@ -38,10 +38,9 @@ class Body extends PIXI.Container {
             const oy = freq/2 + i * 6;
             const offset = Math.floor(freq * 1.3 / this.D);
             const ri = i + 16;
-            this.legs.push(new Leg(this, freq, ri, ri, -1,  1, 50, ox));
-            this.legs.push(new Leg(this, freq, ri, ri, -1, -1, 50, oy));
+            this.legs.push(new Leg(this, freq, ri, ri, "back",  "left", 50, ox));
+            this.legs.push(new Leg(this, freq, ri, ri, "back",  "right", 50, ox + freq/2));
         }
-        
         this.legs.forEach((o) => this.addChild(o));
     }
     public setHead(pos: Pos) {
@@ -132,8 +131,8 @@ class Leg extends PIXI.Graphics {
         stepDistance: number, 
         targetRootIndex: number, 
         rootIndex: number, 
-        directionFB: number, 
-        directionLR: number,
+        directionFB: string, 
+        directionLR: string,
         distanceFromRoot: number,
         stepOffset: number) {
         super();
@@ -168,11 +167,11 @@ class Leg extends PIXI.Graphics {
     public setStepOffset(value: number): void {
         this.stepOffset = Math.floor(value);
     }
-    public setDirectionLR(value: number): void {
-        this.directionLR = Math.floor(value);
+    public setDirectionLR(value: string): void {
+        this.directionLR = Math.floor(value=="left"?1:-1);
     }
-    public setDirectionFB(value: number): void {
-        this.directionFB = Math.floor(value);
+    public setDirectionFB(value: string): void {
+        this.directionFB = Math.floor(value=="front"?1:-1);
     }
     public setMoveDistance(value: number): void {
         value += this.stepOffset;

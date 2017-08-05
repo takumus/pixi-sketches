@@ -171,8 +171,8 @@
 	            var oy = freq / 2 + i * 6;
 	            var offset = Math.floor(freq * 1.3 / _this.D);
 	            var ri = i + 16;
-	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, 1, 50, ox));
-	            _this.legs.push(new Leg(_this, freq, ri, ri, -1, -1, 50, oy));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, "back", "left", 50, ox));
+	            _this.legs.push(new Leg(_this, freq, ri, ri, "back", "right", 50, ox + freq / 2));
 	        }
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
@@ -284,10 +284,10 @@
 	        this.stepOffset = Math.floor(value);
 	    };
 	    Leg.prototype.setDirectionLR = function (value) {
-	        this.directionLR = Math.floor(value);
+	        this.directionLR = Math.floor(value == "left" ? 1 : -1);
 	    };
 	    Leg.prototype.setDirectionFB = function (value) {
-	        this.directionFB = Math.floor(value);
+	        this.directionFB = Math.floor(value == "front" ? 1 : -1);
 	    };
 	    Leg.prototype.setMoveDistance = function (value) {
 	        value += this.stepOffset;
