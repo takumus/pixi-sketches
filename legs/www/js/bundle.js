@@ -165,15 +165,8 @@
 	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        for (var i = 0; i < 1; i++) {
-	            var freq = 80;
-	            var ox = 0 + i * 6;
-	            var oy = freq / 2 + i * 6;
-	            var offset = Math.floor(freq * 1.3 / _this.D);
-	            var ri = i + 16;
-	            _this.legs.push(new Leg(_this, freq, ri, ri, "back", "left", 50, ox));
-	            _this.legs.push(new Leg(_this, freq, ri, ri, "back", "right", 50, ox + freq / 2));
-	        }
+	        _this.legs.push(new Leg(_this, 100, 2, 2, "back", "left", 50, 0));
+	        _this.legs.push(new Leg(_this, 100, 2, 2, "back", "right", 50, 50));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
@@ -331,7 +324,7 @@
 	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            var poses = BugLegs.getPos(p, this.nowPos, 80, 60, this.directionFB, this.directionLR);
+	            var poses = BugLegs.getPos(p, this.nowPos, 60, 60, this.directionFB, this.directionLR);
 	            this.moveTo(poses.begin.x, poses.begin.y);
 	            this.lineTo(poses.middle.x, poses.middle.y);
 	            this.lineTo(poses.end.x, poses.end.y);

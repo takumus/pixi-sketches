@@ -32,15 +32,8 @@ class Body extends PIXI.Container {
         super();
         this.canvas = new PIXI.Graphics();
         this.addChild(this.canvas);
-        for (let i = 0; i < 1; i ++) {
-            const freq = 80;
-            const ox = 0 + i * 6;
-            const oy = freq/2 + i * 6;
-            const offset = Math.floor(freq * 1.3 / this.D);
-            const ri = i + 16;
-            this.legs.push(new Leg(this, freq, ri, ri, "back",  "left", 50, ox));
-            this.legs.push(new Leg(this, freq, ri, ri, "back",  "right", 50, ox + freq/2));
-        }
+        this.legs.push(new Leg(this, 100, 2, 2, "back", "left", 50, 0));
+        this.legs.push(new Leg(this, 100, 2, 2, "back", "right", 50, 50));
         this.legs.forEach((o) => this.addChild(o));
     }
     public setHead(pos: Pos) {
@@ -218,7 +211,7 @@ class Leg extends PIXI.Graphics {
             this.lineStyle(1, this.c * 0.4);
             this.endFill();
 
-            const poses = BugLegs.getPos(p, this.nowPos, 80, 60, this.directionFB, this.directionLR);
+            const poses = BugLegs.getPos(p, this.nowPos, 60, 60, this.directionFB, this.directionLR);
             this.moveTo(poses.begin.x, poses.begin.y);
             this.lineTo(poses.middle.x, poses.middle.y);
             this.lineTo(poses.end.x, poses.end.y);
