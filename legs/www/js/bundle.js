@@ -132,13 +132,15 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var canvas_1 = __webpack_require__(2);
+	var bugs_1 = __webpack_require__(3);
+	var pos_1 = __webpack_require__(4);
 	var Main = (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
 	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
 	    Main.prototype.init = function () {
-	        this.body = new Body();
+	        this.body = new bugs_1.Body();
 	        this.addChild(this.body);
 	    };
 	    Main.prototype.mousedown = function () {
@@ -146,7 +148,7 @@
 	    Main.prototype.mouseup = function () {
 	    };
 	    Main.prototype.draw = function () {
-	        this.body.setHead(new Pos(this.mouse.x, this.mouse.y));
+	        this.body.setHead(new pos_1.default(this.mouse.x, this.mouse.y));
 	    };
 	    Main.prototype.resize = function (width, height) {
 	    };
@@ -154,6 +156,76 @@
 	}(canvas_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var Canvas = (function (_super) {
+	    __extends(Canvas, _super);
+	    function Canvas() {
+	        var _this = _super.call(this) || this;
+	        _this.mousePressed = false;
+	        _this.mouse = { x: 0, y: 0 };
+	        _this.size = { width: 0, height: 0 };
+	        _this.canvas = new PIXI.Graphics();
+	        _this.addChild(_this.canvas);
+	        _this.init();
+	        return _this;
+	    }
+	    Canvas.prototype.init = function () {
+	    };
+	    Canvas.prototype.draw = function () {
+	    };
+	    Canvas.prototype.mousedown = function () {
+	    };
+	    Canvas.prototype.mouseup = function () {
+	    };
+	    Canvas.prototype.mousemove = function () {
+	    };
+	    Canvas.prototype.resize = function (width, height) {
+	    };
+	    return Canvas;
+	}(PIXI.Container));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Canvas;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var pos_1 = __webpack_require__(4);
+	var PosStack = (function (_super) {
+	    __extends(PosStack, _super);
+	    function PosStack() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    PosStack.prototype.forEach = function (callback) {
+	        var p = this;
+	        var id = 0;
+	        while (p) {
+	            if (!callback(p, id))
+	                break;
+	            p = p.next;
+	            id++;
+	        }
+	    };
+	    return PosStack;
+	}(pos_1.default));
 	var Body = (function (_super) {
 	    __extends(Body, _super);
 	    function Body() {
@@ -239,6 +311,7 @@
 	    };
 	    return Body;
 	}(PIXI.Container));
+	exports.Body = Body;
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
 	    function Leg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, distanceFromRoot, stepOffset) {
@@ -246,9 +319,9 @@
 	        _this.step = 0;
 	        _this.sid2 = 0;
 	        _this.c = 0xff5500;
-	        _this.nowPos = new Pos(0, 0);
-	        _this.nextPos = new Pos(0, 0);
-	        _this.prevPos = new Pos(0, 0);
+	        _this.nowPos = new pos_1.default(0, 0);
+	        _this.nextPos = new pos_1.default(0, 0);
+	        _this.prevPos = new pos_1.default(0, 0);
 	        _this.setBody(body);
 	        _this.setDirectionLR(directionLR);
 	        _this.setDirectionFB(directionFB);
@@ -320,13 +393,13 @@
 	        this.lineStyle();
 	        this.beginFill(this.c);
 	        this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
-	        var p = this.body.bone[this.rootIndex];
-	        if (p) {
+	        var fromPos = this.body.bone[this.rootIndex];
+	        if (fromPos) {
 	            this.beginFill(this.c * 0.2);
-	            this.drawCircle(p.x, p.y, 5);
+	            this.drawCircle(fromPos.x, fromPos.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            this.drawLegs(p, this.nowPos);
+	            this.drawLegs(fromPos, this.nowPos);
 	        }
 	    };
 	    Leg.prototype.drawLegs = function (fromPos, targetPos) {
@@ -344,7 +417,7 @@
 	            fp = this.body.bone[id + 1];
 	        }
 	        if (!tp || !fp || !bp)
-	            return new Pos(0, 0);
+	            return new pos_1.default(0, 0);
 	        var ddx = tp.x - fp.x;
 	        var ddy = tp.y - fp.y;
 	        var D = Math.sqrt(ddx * ddx + ddy * ddy);
@@ -359,40 +432,7 @@
 	    };
 	    return Leg;
 	}(PIXI.Graphics));
-	var Pos = (function () {
-	    function Pos(x, y) {
-	        this.x = x;
-	        this.y = y;
-	    }
-	    Pos.prototype.clone = function () {
-	        return new Pos(this.x, this.y);
-	    };
-	    Pos.prototype.distance = function (pos) {
-	        return Math.sqrt((pos.x - this.x) * (pos.x - this.x) + (pos.y - this.y) * (pos.y - this.y));
-	    };
-	    Pos.prototype.copyTo = function (pos) {
-	        pos.x = this.x;
-	        pos.y = this.y;
-	    };
-	    return Pos;
-	}());
-	var PosStack = (function (_super) {
-	    __extends(PosStack, _super);
-	    function PosStack() {
-	        return _super !== null && _super.apply(this, arguments) || this;
-	    }
-	    PosStack.prototype.forEach = function (callback) {
-	        var p = this;
-	        var id = 0;
-	        while (p) {
-	            if (!callback(p, id))
-	                break;
-	            p = p.next;
-	            id++;
-	        }
-	    };
-	    return PosStack;
-	}(Pos));
+	exports.Leg = Leg;
 	var BugLegs = (function () {
 	    function BugLegs() {
 	    }
@@ -415,7 +455,7 @@
 	        var y = Math.sin(rr) * b + fromPos.y;
 	        return {
 	            begin: fromPos.clone(),
-	            middle: new Pos(x, y),
+	            middle: new pos_1.default(x, y),
 	            end: toPos.clone()
 	        };
 	    };
@@ -424,43 +464,29 @@
 
 
 /***/ },
-/* 2 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var Canvas = (function (_super) {
-	    __extends(Canvas, _super);
-	    function Canvas() {
-	        var _this = _super.call(this) || this;
-	        _this.mousePressed = false;
-	        _this.mouse = { x: 0, y: 0 };
-	        _this.size = { width: 0, height: 0 };
-	        _this.canvas = new PIXI.Graphics();
-	        _this.addChild(_this.canvas);
-	        _this.init();
-	        return _this;
+	var Pos = (function () {
+	    function Pos(x, y) {
+	        this.x = x;
+	        this.y = y;
 	    }
-	    Canvas.prototype.init = function () {
+	    Pos.prototype.clone = function () {
+	        return new Pos(this.x, this.y);
 	    };
-	    Canvas.prototype.draw = function () {
+	    Pos.prototype.distance = function (pos) {
+	        return Math.sqrt((pos.x - this.x) * (pos.x - this.x) + (pos.y - this.y) * (pos.y - this.y));
 	    };
-	    Canvas.prototype.mousedown = function () {
+	    Pos.prototype.copyTo = function (pos) {
+	        pos.x = this.x;
+	        pos.y = this.y;
 	    };
-	    Canvas.prototype.mouseup = function () {
-	    };
-	    Canvas.prototype.mousemove = function () {
-	    };
-	    Canvas.prototype.resize = function (width, height) {
-	    };
-	    return Canvas;
-	}(PIXI.Container));
+	    return Pos;
+	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Canvas;
+	exports.default = Pos;
 
 
 /***/ }
