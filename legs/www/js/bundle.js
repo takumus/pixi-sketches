@@ -165,8 +165,10 @@
 	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        _this.legs.push(new Leg(_this, 100, 2, 2, "back", "left", 50, 0));
-	        _this.legs.push(new Leg(_this, 100, 2, 2, "back", "right", 50, 50));
+	        _this.legs.push(new Leg(_this, 120, 0, 8, "front", "left", 50, 0));
+	        _this.legs.push(new Leg(_this, 120, 0, 8, "front", "right", 50, 60));
+	        _this.legs.push(new Leg(_this, 120, 10, 10, "back", "left", 50, 60));
+	        _this.legs.push(new Leg(_this, 120, 10, 10, "back", "right", 50, 0));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
@@ -309,10 +311,10 @@
 	        //r = Math.pow(r, 2);
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        this.lineStyle(1, this.c * 0.2);
+	        this.lineStyle(1, 0xCCCCCC);
 	        this.moveTo(this.prevPos.x, this.prevPos.y);
 	        this.lineTo(this.nextPos.x, this.nextPos.y);
-	        this.lineStyle(1, this.c);
+	        this.lineStyle(1, 0xCCCCCC);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
 	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
 	        this.lineStyle();
@@ -324,11 +326,14 @@
 	            this.drawCircle(p.x, p.y, 5);
 	            this.lineStyle(1, this.c * 0.4);
 	            this.endFill();
-	            var poses = BugLegs.getPos(p, this.nowPos, 60, 60, this.directionFB, this.directionLR);
-	            this.moveTo(poses.begin.x, poses.begin.y);
-	            this.lineTo(poses.middle.x, poses.middle.y);
-	            this.lineTo(poses.end.x, poses.end.y);
+	            this.drawLegs(p, this.nowPos);
 	        }
+	    };
+	    Leg.prototype.drawLegs = function (fromPos, targetPos) {
+	        var poses = BugLegs.getPos(fromPos, targetPos, 60, 60, this.directionFB, this.directionLR);
+	        this.moveTo(poses.begin.x, poses.begin.y);
+	        this.lineTo(poses.middle.x, poses.middle.y);
+	        this.lineTo(poses.end.x, poses.end.y);
 	    };
 	    Leg.prototype.getTargetPos = function (id, d, length) {
 	        var bp = this.body.bone[id];
