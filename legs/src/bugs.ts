@@ -216,7 +216,7 @@ export class Leg extends PIXI.Graphics {
         }
     }
     protected drawLegs(fromPos: Pos, targetPos: Pos): void {
-        const poses = BugLegs.getPos(fromPos, targetPos, 60, 60, this.directionFB, this.directionLR);
+        const poses = BugLegs.getPos(fromPos, targetPos, 70, 70, this.directionFB, this.directionLR);
         this.moveTo(poses.begin.x, poses.begin.y);
         this.lineTo(poses.middle.x, poses.middle.y);
         this.lineTo(poses.end.x, poses.end.y);
