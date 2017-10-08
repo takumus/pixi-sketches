@@ -10,37 +10,26 @@ class PosStack extends Pos {
             id ++;
         }
     }
+    public static fromPos(pos: Pos) {
+        return new PosStack(pos.x, pos.y);
+    }
 }
 export class Body extends PIXI.Container {
-    private canvas: PIXI.Graphics;
+    public canvas: PIXI.Graphics;
+    public D = 18;
+    public bone: Pos[];
+    public legs: Leg[] = [];
     private interval: number = 10;
     private posStack: PosStack;
-
-    public D = 18;
     private L = 30;
-
     private d: number = 0;
-
-    public bone: Pos[];
-
-    private legs: Leg[] = [];
     constructor() {
         super();
         this.canvas = new PIXI.Graphics();
         this.addChild(this.canvas);
-        this.legs.push(new Leg(this, 120, 0, 8, "front", "left", 50, 0));
-        this.legs.push(new Leg(this, 120, 0, 8, "front", "right", 50, 60));
-
-        this.legs.push(new Leg(this, 120, 10, 10, "back", "left", 50, 60));
-        this.legs.push(new Leg(this, 120, 10, 10, "back", "right", 50, 0));
-        
-        this.legs.forEach((o) => this.addChild(o));
     }
     public setHead(pos: Pos) {
-        const np = new PosStack(
-            pos.x,
-            pos.y
-        );
+        const np = PosStack.fromPos(pos);
         if (this.posStack) {
             if (np.distance(this.posStack) > 1) {
                 this.d += np.distance(this.posStack);
@@ -51,9 +40,7 @@ export class Body extends PIXI.Container {
             this.posStack = np;
         }
         this.bone = [];
-
         this.canvas.clear();
-
         this.canvas.lineStyle(1, 0xCCCCCC);
         this.posStack.forEach((p, id) => {
             if (id == 0) {
@@ -64,7 +51,6 @@ export class Body extends PIXI.Container {
             return true;
         });
         this.canvas.lineStyle();
-
         let pp: PosStack = this.posStack;
         let tp: Pos = this.posStack;
         const body: Pos[] = [];
@@ -115,31 +101,15 @@ export class Leg extends PIXI.Graphics {
     private nextPos: Pos;
     private prevPos: Pos;
     private nowPos: Pos;
-    private directionLR: number;
-    private directionFB: number;
+    protected directionLR: number;
     private stepOffset: number;
     private distanceFromRoot: number;
-    constructor(
-        body: Body, 
-        stepDistance: number, 
-        targetRootIndex: number, 
-        rootIndex: number, 
-        directionFB: string, 
-        directionLR: string,
-        distanceFromRoot: number,
-        stepOffset: number) {
+    constructor(body: Body) {
         super();
         this.nowPos = new Pos(0, 0);
         this.nextPos = new Pos(0, 0);
         this.prevPos = new Pos(0, 0);
         this.setBody(body);
-        this.setDirectionLR(directionLR);
-        this.setDirectionFB(directionFB);
-        this.setStepDistance(stepDistance);
-        this.setDistanceFromRoot(distanceFromRoot);
-        this.setTargetRootIndex(targetRootIndex);
-        this.setStepOffset(stepOffset);
-        this.setRootIndex(rootIndex);
     }
     public setDistanceFromRoot(value: number): void {
         this.distanceFromRoot = value;
@@ -163,9 +133,6 @@ export class Leg extends PIXI.Graphics {
     public setDirectionLR(value: string): void {
         this.directionLR = Math.floor(value=="left"?1:-1);
     }
-    public setDirectionFB(value: string): void {
-        this.directionFB = Math.floor(value=="front"?1:-1);
-    }
     public setMoveDistance(value: number): void {
         value += this.stepOffset;
         const stepRate = value % this.stepDistance;
@@ -175,52 +142,40 @@ export class Leg extends PIXI.Graphics {
         if (diffStep > 0) {
             this.step = step;
             const nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-            const nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);//this.body.bone[nextId];
+            const nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
             if (diffStep == 1) {
                 this.nextPos.copyTo(this.prevPos);
                 nextPos.copyTo(this.nextPos);
             }else if (diffStep > 1) {
                 this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
-                //this.body.bone[nextId].copyTo(this.nextPos);
                 const prevId = nextId + Math.floor(this.stepDistance / this.body.D);
                 this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromRoot);
-                //this.body.bone[prevId].copyTo(this.prevPos);
             }
         }
         this.clear();
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
         let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-        //r = Math.pow(r, 2);
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-
         this.lineStyle(1, 0xCCCCCC);
         this.moveTo(this.prevPos.x, this.prevPos.y);
         this.lineTo(this.nextPos.x, this.nextPos.y);
         this.lineStyle(1, 0xCCCCCC);
         this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
         this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
-        
         this.lineStyle();
         this.beginFill(this.c);
         this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
-
         const fromPos = this.body.bone[this.rootIndex];
         if (fromPos) {
             this.beginFill(this.c * 0.2);
             this.drawCircle(fromPos.x, fromPos.y, 5);
             this.lineStyle(1, this.c * 0.4);
             this.endFill();
-
             this.drawLegs(fromPos, this.nowPos);
         }
     }
-    protected drawLegs(fromPos: Pos, targetPos: Pos): void {
-        const poses = BugLegs.getPos(fromPos, targetPos, 70, 70, this.directionFB, this.directionLR);
-        this.moveTo(poses.begin.x, poses.begin.y);
-        this.lineTo(poses.middle.x, poses.middle.y);
-        this.lineTo(poses.end.x, poses.end.y);
-    }
+    protected drawLegs(fromPos: Pos, targetPos: Pos): void {}
     private getTargetPos(id: number, d: number, length: number): Pos {
         let bp = this.body.bone[id];
         let fp: Pos = this.body.bone[id];
@@ -241,32 +196,5 @@ export class Leg extends PIXI.Graphics {
         bp.x += vx * length;
         bp.y += vy * length;
         return bp;
-    }
-}
-
-class BugLegs {
-    public static getPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, fb: number, lr: number) {
-        //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
-        //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
-        //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
-
-        const r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
-        const a = fromPos.distance(toPos);
-        let b = l1;
-        let c = l2;
-        const minA = a * 1.02;
-        if (b + c < minA) {
-            b = c / (b + c) * minA;
-            c = minA - b;
-        }
-        const rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
-        const rr = r + (fb * lr < 0 ? rc : -rc);
-        const x = Math.cos(rr) * b + fromPos.x;
-        const y = Math.sin(rr) * b + fromPos.y;
-        return {
-            begin: fromPos.clone(),
-            middle: new Pos(x, y),
-            end: toPos.clone()
-        };
     }
 }

@@ -140,22 +140,85 @@
 	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
 	    Main.prototype.init = function () {
-	        this.body = new bugs_1.Body();
+	        this.body = new MyBody();
 	        this.addChild(this.body);
 	    };
-	    Main.prototype.mousedown = function () {
-	    };
-	    Main.prototype.mouseup = function () {
-	    };
+	    Main.prototype.mousedown = function () { };
+	    Main.prototype.mouseup = function () { };
 	    Main.prototype.draw = function () {
 	        this.body.setHead(new pos_1.default(this.mouse.x, this.mouse.y));
 	    };
-	    Main.prototype.resize = function (width, height) {
-	    };
+	    Main.prototype.resize = function (width, height) { };
 	    return Main;
 	}(canvas_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
+	var MyLeg = (function (_super) {
+	    __extends(MyLeg, _super);
+	    function MyLeg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, distanceFromRoot, stepOffset, l1l, l2l) {
+	        var _this = _super.call(this, body) || this;
+	        _this.setDirectionLR(directionLR);
+	        _this.setDirectionFB(directionFB);
+	        _this.setStepDistance(stepDistance);
+	        _this.setDistanceFromRoot(distanceFromRoot);
+	        _this.setTargetRootIndex(targetRootIndex);
+	        _this.setStepOffset(stepOffset);
+	        _this.setRootIndex(rootIndex);
+	        _this.setL1L(l1l);
+	        _this.setL2L(l2l);
+	        return _this;
+	    }
+	    MyLeg.prototype.setL1L = function (value) {
+	        this.l1l = value;
+	    };
+	    MyLeg.prototype.setL2L = function (value) {
+	        this.l2l = value;
+	    };
+	    MyLeg.prototype.setDirectionFB = function (value) {
+	        this.directionFB = Math.floor(value == "front" ? 1 : -1);
+	    };
+	    MyLeg.prototype.drawLegs = function (fromPos, targetPos) {
+	        var poses = this.getLegPos(fromPos, targetPos, this.l1l, this.l2l, this.directionFB, this.directionLR);
+	        this.moveTo(poses.begin.x, poses.begin.y);
+	        this.lineTo(poses.middle.x, poses.middle.y);
+	        this.lineTo(poses.end.x, poses.end.y);
+	    };
+	    MyLeg.prototype.getLegPos = function (fromPos, toPos, l1, l2, fb, lr) {
+	        var r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
+	        var a = fromPos.distance(toPos);
+	        var b = l1;
+	        var c = l2;
+	        var minA = a * 1.05;
+	        var bc = b + c;
+	        if (b + c < minA) {
+	            c = c / bc * minA;
+	            b = b / bc * minA;
+	        }
+	        var rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+	        var rr = r + (fb * lr < 0 ? rc : -rc);
+	        var x = Math.cos(rr) * b + fromPos.x;
+	        var y = Math.sin(rr) * b + fromPos.y;
+	        return {
+	            begin: fromPos.clone(),
+	            middle: new pos_1.default(x, y),
+	            end: toPos.clone()
+	        };
+	    };
+	    return MyLeg;
+	}(bugs_1.Leg));
+	var MyBody = (function (_super) {
+	    __extends(MyBody, _super);
+	    function MyBody() {
+	        var _this = _super.call(this) || this;
+	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "left", 50, 20, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "right", 50, 80, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "left", 50, 60, 80, 70));
+	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "right", 50, 0, 80, 70));
+	        _this.legs.forEach(function (o) { return _this.addChild(o); });
+	        return _this;
+	    }
+	    return MyBody;
+	}(bugs_1.Body));
 
 
 /***/ },
@@ -224,29 +287,27 @@
 	            id++;
 	        }
 	    };
+	    PosStack.fromPos = function (pos) {
+	        return new PosStack(pos.x, pos.y);
+	    };
 	    return PosStack;
 	}(pos_1.default));
 	var Body = (function (_super) {
 	    __extends(Body, _super);
 	    function Body() {
 	        var _this = _super.call(this) || this;
-	        _this.interval = 10;
 	        _this.D = 18;
+	        _this.legs = [];
+	        _this.interval = 10;
 	        _this.L = 30;
 	        _this.d = 0;
-	        _this.legs = [];
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
-	        _this.legs.push(new Leg(_this, 120, 0, 8, "front", "left", 50, 0));
-	        _this.legs.push(new Leg(_this, 120, 0, 8, "front", "right", 50, 60));
-	        _this.legs.push(new Leg(_this, 120, 10, 10, "back", "left", 50, 60));
-	        _this.legs.push(new Leg(_this, 120, 10, 10, "back", "right", 50, 0));
-	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
 	    Body.prototype.setHead = function (pos) {
 	        var _this = this;
-	        var np = new PosStack(pos.x, pos.y);
+	        var np = PosStack.fromPos(pos);
 	        if (this.posStack) {
 	            if (np.distance(this.posStack) > 1) {
 	                this.d += np.distance(this.posStack);
@@ -314,7 +375,7 @@
 	exports.Body = Body;
 	var Leg = (function (_super) {
 	    __extends(Leg, _super);
-	    function Leg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, distanceFromRoot, stepOffset) {
+	    function Leg(body) {
 	        var _this = _super.call(this) || this;
 	        _this.step = 0;
 	        _this.sid2 = 0;
@@ -323,13 +384,6 @@
 	        _this.nextPos = new pos_1.default(0, 0);
 	        _this.prevPos = new pos_1.default(0, 0);
 	        _this.setBody(body);
-	        _this.setDirectionLR(directionLR);
-	        _this.setDirectionFB(directionFB);
-	        _this.setStepDistance(stepDistance);
-	        _this.setDistanceFromRoot(distanceFromRoot);
-	        _this.setTargetRootIndex(targetRootIndex);
-	        _this.setStepOffset(stepOffset);
-	        _this.setRootIndex(rootIndex);
 	        return _this;
 	    }
 	    Leg.prototype.setDistanceFromRoot = function (value) {
@@ -354,9 +408,6 @@
 	    Leg.prototype.setDirectionLR = function (value) {
 	        this.directionLR = Math.floor(value == "left" ? 1 : -1);
 	    };
-	    Leg.prototype.setDirectionFB = function (value) {
-	        this.directionFB = Math.floor(value == "front" ? 1 : -1);
-	    };
 	    Leg.prototype.setMoveDistance = function (value) {
 	        value += this.stepOffset;
 	        var stepRate = value % this.stepDistance;
@@ -366,14 +417,13 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot); //this.body.bone[nextId];
+	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
 	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
-	                //this.body.bone[nextId].copyTo(this.nextPos);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
 	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromRoot);
 	            }
@@ -381,7 +431,6 @@
 	        this.clear();
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-	        //r = Math.pow(r, 2);
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 	        this.lineStyle(1, 0xCCCCCC);
@@ -402,12 +451,7 @@
 	            this.drawLegs(fromPos, this.nowPos);
 	        }
 	    };
-	    Leg.prototype.drawLegs = function (fromPos, targetPos) {
-	        var poses = BugLegs.getPos(fromPos, targetPos, 70, 70, this.directionFB, this.directionLR);
-	        this.moveTo(poses.begin.x, poses.begin.y);
-	        this.lineTo(poses.middle.x, poses.middle.y);
-	        this.lineTo(poses.end.x, poses.end.y);
-	    };
+	    Leg.prototype.drawLegs = function (fromPos, targetPos) { };
 	    Leg.prototype.getTargetPos = function (id, d, length) {
 	        var bp = this.body.bone[id];
 	        var fp = this.body.bone[id];
@@ -433,34 +477,6 @@
 	    return Leg;
 	}(PIXI.Graphics));
 	exports.Leg = Leg;
-	var BugLegs = (function () {
-	    function BugLegs() {
-	    }
-	    BugLegs.getPos = function (fromPos, toPos, l1, l2, fb, lr) {
-	        //const dr = fromVecPos.r + (this._isLeft ? Math.PI / 2 : -Math.PI / 2);
-	        //fromPos.x += Math.cos(dr) * this._distanceFromRoot;
-	        //fromPos.y += Math.sin(dr) * this._distanceFromRoot;
-	        var r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
-	        var a = fromPos.distance(toPos);
-	        var b = l1;
-	        var c = l2;
-	        var minA = a * 1.02;
-	        if (b + c < minA) {
-	            b = c / (b + c) * minA;
-	            c = minA - b;
-	        }
-	        var rc = Math.acos((a * a + b * b - c * c) / (2 * a * b));
-	        var rr = r + (fb * lr < 0 ? rc : -rc);
-	        var x = Math.cos(rr) * b + fromPos.x;
-	        var y = Math.sin(rr) * b + fromPos.y;
-	        return {
-	            begin: fromPos.clone(),
-	            middle: new pos_1.default(x, y),
-	            end: toPos.clone()
-	        };
-	    };
-	    return BugLegs;
-	}());
 
 
 /***/ },
