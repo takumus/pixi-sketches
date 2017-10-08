@@ -3,6 +3,7 @@ import {Body, Leg} from './bugs';
 import Pos from './pos';
 export default class Main extends Canvas {
     private body: Body;
+    private pp: Pos;
     public init() {
         this.body = new MyBody();
         this.addChild(this.body);
@@ -10,7 +11,12 @@ export default class Main extends Canvas {
     public mousedown() {}
     public mouseup() {}
     public draw() {
-        this.body.setHead(new Pos(this.mouse.x, this.mouse.y));
+        if (!this.pp) {
+            this.pp = new Pos(this.mouse.x, this.mouse.y);
+        }
+        this.pp.x += (this.mouse.x - this.pp.x) * 0.07;
+        this.pp.y += (this.mouse.y - this.pp.y) * 0.07;
+        this.body.setHead(this.pp);
     }
     public resize(width: number, height: number) {}
 }
@@ -58,9 +64,16 @@ class MyLeg extends Leg {
             this.directionFB,
             this.directionLR
         );
+        this.lineStyle(4, 0x666666);
         this.moveTo(poses.begin.x, poses.begin.y);
         this.lineTo(poses.middle.x, poses.middle.y);
+        this.lineStyle(2, 0x666666)
+        this.moveTo(poses.middle.x, poses.middle.y);
         this.lineTo(poses.end.x, poses.end.y);
+        this.lineStyle();
+        this.beginFill(0x666666);
+        this.drawCircle(poses.middle.x, poses.middle.y, 2);
+        this.drawCircle(poses.end.x, poses.end.y, 3);
     }
     private getLegPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, fb: number, lr: number) {
         const r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
@@ -87,10 +100,13 @@ class MyLeg extends Leg {
 class MyBody extends Body {
     constructor() {
         super();
-        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "left", 50, 20, 60, 50));
-        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "right", 50, 80, 60, 50));
-        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "left", 50, 60, 80, 70));
-        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "right", 50, 0, 80, 70));
+        const d = 10;
+        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "left", 50, 0 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "right", 50, 60 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "left", 60, 60 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "right", 60, 0 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, 17, 17, "back", "left", 60, 0, 80, 90));
+        this.legs.push(new MyLeg(this, 120, 17, 17, "back", "right", 60, 60, 80, 90));
         this.legs.forEach((o) => this.addChild(o));
     }
 }

@@ -146,7 +146,12 @@
 	    Main.prototype.mousedown = function () { };
 	    Main.prototype.mouseup = function () { };
 	    Main.prototype.draw = function () {
-	        this.body.setHead(new pos_1.default(this.mouse.x, this.mouse.y));
+	        if (!this.pp) {
+	            this.pp = new pos_1.default(this.mouse.x, this.mouse.y);
+	        }
+	        this.pp.x += (this.mouse.x - this.pp.x) * 0.07;
+	        this.pp.y += (this.mouse.y - this.pp.y) * 0.07;
+	        this.body.setHead(this.pp);
 	    };
 	    Main.prototype.resize = function (width, height) { };
 	    return Main;
@@ -179,9 +184,16 @@
 	    };
 	    MyLeg.prototype.drawLegs = function (fromPos, targetPos) {
 	        var poses = this.getLegPos(fromPos, targetPos, this.l1l, this.l2l, this.directionFB, this.directionLR);
+	        this.lineStyle(4, 0x666666);
 	        this.moveTo(poses.begin.x, poses.begin.y);
 	        this.lineTo(poses.middle.x, poses.middle.y);
+	        this.lineStyle(2, 0x666666);
+	        this.moveTo(poses.middle.x, poses.middle.y);
 	        this.lineTo(poses.end.x, poses.end.y);
+	        this.lineStyle();
+	        this.beginFill(0x666666);
+	        this.drawCircle(poses.middle.x, poses.middle.y, 2);
+	        this.drawCircle(poses.end.x, poses.end.y, 3);
 	    };
 	    MyLeg.prototype.getLegPos = function (fromPos, toPos, l1, l2, fb, lr) {
 	        var r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
@@ -210,10 +222,13 @@
 	    __extends(MyBody, _super);
 	    function MyBody() {
 	        var _this = _super.call(this) || this;
-	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "left", 50, 20, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "right", 50, 80, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "left", 50, 60, 80, 70));
-	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "right", 50, 0, 80, 70));
+	        var d = 10;
+	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "left", 50, 0 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, 0, 8, "front", "right", 50, 60 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "left", 60, 60 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, 12, 12, "back", "right", 60, 0 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, 17, 17, "back", "left", 60, 0, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, 17, 17, "back", "right", 60, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
