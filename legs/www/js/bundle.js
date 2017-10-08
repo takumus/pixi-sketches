@@ -222,7 +222,7 @@
 	    __extends(MyBody, _super);
 	    function MyBody() {
 	        var _this = _super.call(this) || this;
-	        var d = 10;
+	        var d = 15;
 	        _this.legs.push(new MyLeg(_this, 120, 10, 18, "front", "left", 50, 0 + d * 2, 60, 50));
 	        _this.legs.push(new MyLeg(_this, 120, 10, 18, "front", "right", 50, 60 + d * 2, 60, 50));
 	        _this.legs.push(new MyLeg(_this, 120, 22, 22, "back", "left", 60, 60 + d * 1, 70, 80));
