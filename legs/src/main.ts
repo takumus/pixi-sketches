@@ -101,12 +101,12 @@ class MyBody extends Body {
     constructor() {
         super();
         const d = 10;
-        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "left", 50, 0 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, 0, 8, "front", "right", 50, 60 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "left", 60, 60 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, 12, 12, "back", "right", 60, 0 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, 17, 17, "back", "left", 60, 0, 80, 90));
-        this.legs.push(new MyLeg(this, 120, 17, 17, "back", "right", 60, 60, 80, 90));
+        this.legs.push(new MyLeg(this, 120, 10, 18, "front", "left", 50, 0 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, 10, 18, "front", "right", 50, 60 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, 22, 22, "back", "left", 60, 60 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, 22, 22, "back", "right", 60, 0 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, 27, 27, "back", "left", 60, 0, 80, 90));
+        this.legs.push(new MyLeg(this, 120, 27, 27, "back", "right", 60, 60, 80, 90));
         this.legs.forEach((o) => this.addChild(o));
     }
 }
