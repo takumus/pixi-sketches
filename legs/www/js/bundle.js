@@ -165,7 +165,7 @@
 	        _this.setDirectionLR(directionLR);
 	        _this.setDirectionFB(directionFB);
 	        _this.setStepDistance(stepDistance);
-	        _this.setDistanceFromRoot(distanceFromRoot);
+	        _this.setDistanceFromBody(distanceFromRoot);
 	        _this.setTargetRootIndex(targetRootIndex);
 	        _this.setStepOffset(stepOffset);
 	        _this.setRootIndex(rootIndex);
@@ -222,14 +222,23 @@
 	    __extends(MyBody, _super);
 	    function MyBody() {
 	        var _this = _super.call(this) || this;
+	        var offset = 0;
 	        var d = 15;
-	        _this.legs.push(new MyLeg(_this, 120, 10, 18, "front", "left", 50, 0 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, 10, 18, "front", "right", 50, 60 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, 22, 22, "back", "left", 60, 60 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, 22, 22, "back", "right", 60, 0 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, 27, 27, "back", "left", 60, 0, 80, 90));
-	        _this.legs.push(new MyLeg(_this, 120, 27, 27, "back", "right", 60, 60, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 50, 0 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 50, 60 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 60, 60 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 60, 0 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 60, 0, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 60, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
+	        window["so"] = function (o) {
+	            _this.legs[0].setStepOffset(0 + o * 2);
+	            _this.legs[1].setStepOffset(60 + o * 2);
+	            _this.legs[2].setStepOffset(60 + o * 1);
+	            _this.legs[3].setStepOffset(0 + o * 1);
+	            _this.legs[4].setStepOffset(0);
+	            _this.legs[5].setStepOffset(60);
+	        };
 	        return _this;
 	    }
 	    return MyBody;
@@ -401,8 +410,8 @@
 	        _this.setBody(body);
 	        return _this;
 	    }
-	    Leg.prototype.setDistanceFromRoot = function (value) {
-	        this.distanceFromRoot = value;
+	    Leg.prototype.setDistanceFromBody = function (value) {
+	        this.distanceFromBody = value;
 	    };
 	    Leg.prototype.setBody = function (body) {
 	        this.body = body;
@@ -432,28 +441,29 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
+	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
+	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
-	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromRoot);
+	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromBody);
 	            }
 	        }
 	        this.clear();
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+	        var a = 1 - r;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        this.lineStyle(1, 0xCCCCCC);
+	        this.lineStyle(1, 0x0000ff, a);
 	        this.moveTo(this.prevPos.x, this.prevPos.y);
 	        this.lineTo(this.nextPos.x, this.nextPos.y);
-	        this.lineStyle(1, 0xCCCCCC);
+	        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
-	        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
+	        //this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
 	        this.lineStyle();
 	        this.beginFill(this.c);
 	        this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);

@@ -103,7 +103,7 @@ export class Leg extends PIXI.Graphics {
     private nowPos: Pos;
     protected directionLR: number;
     private stepOffset: number;
-    private distanceFromRoot: number;
+    private distanceFromBody: number;
     constructor(body: Body) {
         super();
         this.nowPos = new Pos(0, 0);
@@ -111,8 +111,8 @@ export class Leg extends PIXI.Graphics {
         this.prevPos = new Pos(0, 0);
         this.setBody(body);
     }
-    public setDistanceFromRoot(value: number): void {
-        this.distanceFromRoot = value;
+    public setDistanceFromBody(value: number): void {
+        this.distanceFromBody = value;
     }
     public setBody(body: Body): void {
         this.body = body;
@@ -142,27 +142,28 @@ export class Leg extends PIXI.Graphics {
         if (diffStep > 0) {
             this.step = step;
             const nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-            const nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
+            const nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
             if (diffStep == 1) {
                 this.nextPos.copyTo(this.prevPos);
                 nextPos.copyTo(this.nextPos);
             }else if (diffStep > 1) {
-                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromRoot);
+                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
                 const prevId = nextId + Math.floor(this.stepDistance / this.body.D);
-                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromRoot);
+                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromBody);
             }
         }
         this.clear();
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
         let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+        const a = 1 - r;
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-        this.lineStyle(1, 0xCCCCCC);
+        this.lineStyle(1, 0x0000ff, a);
         this.moveTo(this.prevPos.x, this.prevPos.y);
         this.lineTo(this.nextPos.x, this.nextPos.y);
-        this.lineStyle(1, 0xCCCCCC);
+        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
         this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
-        this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
+        //this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
         this.lineStyle();
         this.beginFill(this.c);
         this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
