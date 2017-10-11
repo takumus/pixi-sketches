@@ -231,7 +231,7 @@
 	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 60, 0, 80, 90));
 	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 60, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
-	        window["so"] = function (o) {
+	        window["setOffset"] = function (o) {
 	            _this.legs[0].setStepOffset(0 + o * 2);
 	            _this.legs[1].setStepOffset(60 + o * 2);
 	            _this.legs[2].setStepOffset(60 + o * 1);

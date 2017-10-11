@@ -109,7 +109,7 @@ class MyBody extends Body {
         this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back", "left", 60, 0, 80, 90));
         this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back", "right", 60, 60, 80, 90));
         this.legs.forEach((o) => this.addChild(o));
-        window["so"] = (o) => {
+        window["setOffset"] = (o) => {
             this.legs[0].setStepOffset(0 + o * 2);
             this.legs[1].setStepOffset(60 + o * 2);
             this.legs[2].setStepOffset(60 + o * 1);
