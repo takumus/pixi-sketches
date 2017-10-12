@@ -103,7 +103,8 @@ export class Leg extends PIXI.Graphics {
     private nowPos: Pos;
     protected directionLR: number;
     private stepOffset: number;
-    private distanceFromBody: number;
+    private endPointDistanceFromBody: number;
+    private rootPointDistanceFromBody: number;
     constructor(body: Body) {
         super();
         this.nowPos = new Pos(0, 0);
@@ -111,8 +112,11 @@ export class Leg extends PIXI.Graphics {
         this.prevPos = new Pos(0, 0);
         this.setBody(body);
     }
-    public setDistanceFromBody(value: number): void {
-        this.distanceFromBody = value;
+    public setEndPointDistanceFromBody(value: number): void {
+        this.endPointDistanceFromBody = value;
+    }
+    public setRootPointDistanceFromBody(value: number): void {
+        this.rootPointDistanceFromBody = value;
     }
     public setBody(body: Body): void {
         this.body = body;
@@ -142,14 +146,14 @@ export class Leg extends PIXI.Graphics {
         if (diffStep > 0) {
             this.step = step;
             const nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-            const nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
+            const nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
             if (diffStep == 1) {
                 this.nextPos.copyTo(this.prevPos);
                 nextPos.copyTo(this.nextPos);
             }else if (diffStep > 1) {
-                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
+                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
                 const prevId = nextId + Math.floor(this.stepDistance / this.body.D);
-                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromBody);
+                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
             }
         }
         this.clear();

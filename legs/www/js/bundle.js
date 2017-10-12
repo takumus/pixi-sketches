@@ -160,12 +160,13 @@
 	exports.default = Main;
 	var MyLeg = (function (_super) {
 	    __extends(MyLeg, _super);
-	    function MyLeg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, distanceFromRoot, stepOffset, l1l, l2l) {
+	    function MyLeg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, rootPointDistanceFromBody, endPointDistanceFromBody, stepOffset, l1l, l2l) {
 	        var _this = _super.call(this, body) || this;
 	        _this.setDirectionLR(directionLR);
 	        _this.setDirectionFB(directionFB);
 	        _this.setStepDistance(stepDistance);
-	        _this.setDistanceFromBody(distanceFromRoot);
+	        _this.setEndPointDistanceFromBody(endPointDistanceFromBody);
+	        _this.setRootPointDistanceFromBody(rootPointDistanceFromBody);
 	        _this.setTargetRootIndex(targetRootIndex);
 	        _this.setStepOffset(stepOffset);
 	        _this.setRootIndex(rootIndex);
@@ -224,12 +225,12 @@
 	        var _this = _super.call(this) || this;
 	        var offset = 0;
 	        var d = 15;
-	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 50, 0 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 50, 60 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 60, 60 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 60, 0 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 60, 0, 80, 90));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 60, 60, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 0, 50, 0 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 0, 50, 60 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 0, 60, 60 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 0, 60, 0 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 0, 60, 0, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 0, 60, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        window["setOffset"] = function (o) {
 	            _this.legs[0].setStepOffset(0 + o * 2);
@@ -410,8 +411,11 @@
 	        _this.setBody(body);
 	        return _this;
 	    }
-	    Leg.prototype.setDistanceFromBody = function (value) {
-	        this.distanceFromBody = value;
+	    Leg.prototype.setEndPointDistanceFromBody = function (value) {
+	        this.endPointDistanceFromBody = value;
+	    };
+	    Leg.prototype.setRootPointDistanceFromBody = function (value) {
+	        this.rootPointDistanceFromBody = value;
 	    };
 	    Leg.prototype.setBody = function (body) {
 	        this.body = body;
@@ -441,15 +445,15 @@
 	        if (diffStep > 0) {
 	            this.step = step;
 	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
-	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
+	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
 	                nextPos.copyTo(this.nextPos);
 	            }
 	            else if (diffStep > 1) {
-	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.distanceFromBody);
+	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
 	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
-	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.distanceFromBody);
+	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
 	            }
 	        }
 	        this.clear();

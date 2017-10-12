@@ -31,7 +31,8 @@ class MyLeg extends Leg {
         rootIndex: number, 
         directionFB: string, 
         directionLR: string,
-        distanceFromRoot: number,
+        rootPointDistanceFromBody: number,
+        endPointDistanceFromBody: number,
         stepOffset: number,
         l1l: number,
         l2l: number
@@ -40,7 +41,8 @@ class MyLeg extends Leg {
         this.setDirectionLR(directionLR);
         this.setDirectionFB(directionFB);
         this.setStepDistance(stepDistance);
-        this.setDistanceFromBody(distanceFromRoot);
+        this.setEndPointDistanceFromBody(endPointDistanceFromBody);
+        this.setRootPointDistanceFromBody(rootPointDistanceFromBody);
         this.setTargetRootIndex(targetRootIndex);
         this.setStepOffset(stepOffset);
         this.setRootIndex(rootIndex);
@@ -102,12 +104,12 @@ class MyBody extends Body {
         super();
         const offset = 0;
         const d = 15;
-        this.legs.push(new MyLeg(this, 120, offset, offset + 8, "front", "left", 50, 0 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, offset, offset + 8, "front", "right", 50, 60 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back", "left", 60, 60 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back", "right", 60, 0 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back", "left", 60, 0, 80, 90));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back", "right", 60, 60, 80, 90));
+        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "left",  0, 50, 0 + d * 2,  60, 50));
+        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "right", 0, 50, 60 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "left",  0, 60, 60 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 0, 60, 0 + d * 1,  70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  0, 60, 0,          80, 90));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 0, 60, 60,         80, 90));
         this.legs.forEach((o) => this.addChild(o));
         window["setOffset"] = (o) => {
             this.legs[0].setStepOffset(0 + o * 2);
