@@ -141,16 +141,35 @@
 	    }
 	    Main.prototype.init = function () {
 	        this.body = new MyBody();
+	        this.body.scale.set(0.5, 0.5);
 	        this.addChild(this.body);
+	        this.offsetElem = document.getElementById("offset");
+	        this.autoElem = document.getElementById("auto");
 	    };
 	    Main.prototype.mousedown = function () { };
 	    Main.prototype.mouseup = function () { };
 	    Main.prototype.draw = function () {
+	        var mx = this.mouse.x * 1 / this.body.scale.x;
+	        var my = this.mouse.y * 1 / this.body.scale.x;
 	        if (!this.pp) {
-	            this.pp = new pos_1.default(this.mouse.x, this.mouse.y);
+	            this.pp = new pos_1.default(mx, my);
 	        }
-	        this.pp.x += (this.mouse.x - this.pp.x) * 0.07;
-	        this.pp.y += (this.mouse.y - this.pp.y) * 0.07;
+	        var vx = mx - this.pp.x;
+	        var vy = my - this.pp.y;
+	        this.pp.x += vx * 0.07;
+	        this.pp.y += vy * 0.07;
+	        var v = Math.sqrt(vx * vx + vy * vy);
+	        var r = v / 500;
+	        r = r > 1 ? 1 : r;
+	        r = 1 - r;
+	        var o = Math.floor(r * 30);
+	        if (this.autoElem.checked) {
+	            this.offsetElem.value = o + "";
+	        }
+	        else {
+	            o = Number(this.offsetElem.value);
+	        }
+	        this.body.setOffset(o);
 	        this.body.setHead(this.pp);
 	    };
 	    Main.prototype.resize = function (width, height) { };
@@ -225,23 +244,23 @@
 	        var _this = _super.call(this) || this;
 	        var offset = 0;
 	        var d = 15;
-	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 0, 50, 0 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 0, 50, 60 + d * 2, 60, 50));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 0, 60, 60 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 0, 60, 0 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 0, 60, 0, 80, 90));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 0, 60, 60, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 10, 50, 0 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 10, 50, 60 + d * 2, 60, 50));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 20, 60, 60 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 20, 60, 0 + d * 1, 70, 80));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 10, 60, 0, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 10, 60, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
-	        window["setOffset"] = function (o) {
-	            _this.legs[0].setStepOffset(0 + o * 2);
-	            _this.legs[1].setStepOffset(60 + o * 2);
-	            _this.legs[2].setStepOffset(60 + o * 1);
-	            _this.legs[3].setStepOffset(0 + o * 1);
-	            _this.legs[4].setStepOffset(0);
-	            _this.legs[5].setStepOffset(60);
-	        };
 	        return _this;
 	    }
+	    MyBody.prototype.setOffset = function (o) {
+	        this.legs[0].setStepOffset(0 + o * 2);
+	        this.legs[1].setStepOffset(60 + o * 2);
+	        this.legs[2].setStepOffset(60 + o * 1);
+	        this.legs[3].setStepOffset(0 + o * 1);
+	        this.legs[4].setStepOffset(0);
+	        this.legs[5].setStepOffset(60);
+	    };
 	    return MyBody;
 	}(bugs_1.Body));
 
@@ -345,7 +364,7 @@
 	        }
 	        this.bone = [];
 	        this.canvas.clear();
-	        this.canvas.lineStyle(1, 0xCCCCCC);
+	        this.canvas.lineStyle(1, 0x666666);
 	        this.posStack.forEach(function (p, id) {
 	            if (id == 0) {
 	                _this.canvas.moveTo(p.x, p.y);
@@ -372,7 +391,7 @@
 	                if (ad > _this.D) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
 	                    _this.canvas.beginFill(0x000000);
-	                    _this.canvas.drawCircle(tp.x, tp.y, 2);
+	                    _this.canvas.drawCircle(tp.x, tp.y, 1.5);
 	                    _this.bone.push(tp.clone());
 	                    body.push(tp.clone());
 	                    _this.canvas.endFill();
@@ -459,6 +478,7 @@
 	        this.clear();
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+	        r = r * r;
 	        var a = 1 - r;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
@@ -467,18 +487,35 @@
 	        this.lineTo(this.nextPos.x, this.nextPos.y);
 	        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
-	        //this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
-	        this.lineStyle();
-	        this.beginFill(this.c);
-	        this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
-	        var fromPos = this.body.bone[this.rootIndex];
-	        if (fromPos) {
-	            this.beginFill(this.c * 0.2);
-	            this.drawCircle(fromPos.x, fromPos.y, 5);
-	            this.lineStyle(1, this.c * 0.4);
+	        var rootPos = this.body.bone[this.rootIndex];
+	        var fromPos = this.getRootPos(this.rootIndex);
+	        if (fromPos && rootPos) {
+	            this.lineStyle();
+	            this.beginFill(0x333333);
+	            this.drawCircle(fromPos.x, fromPos.y, 3);
 	            this.endFill();
+	            this.lineStyle(1, 0x666666);
+	            this.moveTo(rootPos.x, rootPos.y);
+	            this.lineTo(fromPos.x, fromPos.y);
 	            this.drawLegs(fromPos, this.nowPos);
 	        }
+	    };
+	    Leg.prototype.getRootPos = function (baseId) {
+	        var basePos = this.body.bone[baseId];
+	        if (!basePos)
+	            return null;
+	        var pos1 = basePos;
+	        var pos2 = this.body.bone[baseId + 1];
+	        if (!pos2) {
+	            pos1 = this.body.bone[baseId - 1];
+	            pos2 = basePos;
+	        }
+	        var ddx = pos2.x - pos1.x;
+	        var ddy = pos2.y - pos1.y;
+	        var D = Math.sqrt(ddx * ddx + ddy * ddy);
+	        var dx = ddx / D;
+	        var dy = ddy / D;
+	        return new pos_1.default(basePos.x + -this.directionLR * dy * this.rootPointDistanceFromBody, basePos.y + this.directionLR * dx * this.rootPointDistanceFromBody);
 	    };
 	    Leg.prototype.drawLegs = function (fromPos, targetPos) { };
 	    Leg.prototype.getTargetPos = function (id, d, length) {

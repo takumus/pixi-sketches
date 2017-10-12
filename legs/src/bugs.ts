@@ -41,7 +41,7 @@ export class Body extends PIXI.Container {
         }
         this.bone = [];
         this.canvas.clear();
-        this.canvas.lineStyle(1, 0xCCCCCC);
+        this.canvas.lineStyle(1, 0x666666);
         this.posStack.forEach((p, id) => {
             if (id == 0) {
                 this.canvas.moveTo(p.x, p.y);
@@ -69,7 +69,7 @@ export class Body extends PIXI.Container {
                         tp.y + dy / d * nd
                     );
                     this.canvas.beginFill(0x000000);
-                    this.canvas.drawCircle(tp.x, tp.y, 2);
+                    this.canvas.drawCircle(tp.x, tp.y, 1.5);
                     this.bone.push(tp.clone());
                     body.push(tp.clone());
                     this.canvas.endFill();
@@ -159,6 +159,7 @@ export class Leg extends PIXI.Graphics {
         this.clear();
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
         let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
+        r = r * r;
         const a = 1 - r;
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
@@ -167,18 +168,38 @@ export class Leg extends PIXI.Graphics {
         this.lineTo(this.nextPos.x, this.nextPos.y);
         this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
         this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
-        //this.drawRect(this.prevPos.x - 5, this.prevPos.y - 5, 10, 10);
-        this.lineStyle();
-        this.beginFill(this.c);
-        this.drawRect(this.nowPos.x - 2.5, this.nowPos.y - 2.5, 5, 5);
-        const fromPos = this.body.bone[this.rootIndex];
-        if (fromPos) {
-            this.beginFill(this.c * 0.2);
-            this.drawCircle(fromPos.x, fromPos.y, 5);
-            this.lineStyle(1, this.c * 0.4);
+        
+        const rootPos = this.body.bone[this.rootIndex];
+        const fromPos = this.getRootPos(this.rootIndex);
+        if (fromPos && rootPos) {
+            this.lineStyle();
+            this.beginFill(0x333333);
+            this.drawCircle(fromPos.x, fromPos.y, 3);
             this.endFill();
+            this.lineStyle(1, 0x666666);
+            this.moveTo(rootPos.x, rootPos.y);
+            this.lineTo(fromPos.x, fromPos.y);
             this.drawLegs(fromPos, this.nowPos);
         }
+    }
+    private getRootPos(baseId: number) {
+        const basePos = this.body.bone[baseId];
+        if (!basePos) return null;
+        let pos1 = basePos;
+        let pos2 = this.body.bone[baseId + 1];
+        if (!pos2) {
+            pos1 = this.body.bone[baseId - 1];
+            pos2 = basePos;
+        }
+        const ddx = pos2.x - pos1.x;
+        const ddy = pos2.y - pos1.y;
+        const D = Math.sqrt(ddx * ddx + ddy * ddy);
+        const dx = ddx / D;
+        const dy = ddy / D;
+        return new Pos(
+            basePos.x + -this.directionLR * dy * this.rootPointDistanceFromBody,
+            basePos.y + this.directionLR * dx * this.rootPointDistanceFromBody
+        )
     }
     protected drawLegs(fromPos: Pos, targetPos: Pos): void {}
     private getTargetPos(id: number, d: number, length: number): Pos {

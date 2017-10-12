@@ -2,20 +2,42 @@ import Canvas from '../.src/canvas';
 import {Body, Leg} from './bugs';
 import Pos from './pos';
 export default class Main extends Canvas {
-    private body: Body;
+    private body: MyBody;
     private pp: Pos;
+    private offsetElem: HTMLInputElement;
+    private autoElem: HTMLInputElement;
     public init() {
         this.body = new MyBody();
+        this.body.scale.set(0.5, 0.5);
         this.addChild(this.body);
+
+        this.offsetElem = <HTMLInputElement>document.getElementById("offset");
+        this.autoElem = <HTMLInputElement>document.getElementById("auto");
     }
     public mousedown() {}
     public mouseup() {}
     public draw() {
+        const mx = this.mouse.x * 1 / this.body.scale.x;
+        const my = this.mouse.y * 1 / this.body.scale.x;
         if (!this.pp) {
-            this.pp = new Pos(this.mouse.x, this.mouse.y);
+            this.pp = new Pos(mx, my);
         }
-        this.pp.x += (this.mouse.x - this.pp.x) * 0.07;
-        this.pp.y += (this.mouse.y - this.pp.y) * 0.07;
+        const vx = mx - this.pp.x;
+        const vy = my - this.pp.y
+        this.pp.x += vx * 0.07;
+        this.pp.y += vy * 0.07;
+
+        const v = Math.sqrt(vx * vx + vy * vy);
+        let r = v / 500;
+        r = r > 1 ? 1 : r;
+        r = 1 - r;
+        let o = Math.floor(r * 30);
+        if (this.autoElem.checked) {
+            this.offsetElem.value = o + "";
+        }else {
+            o = Number(this.offsetElem.value);
+        }
+        this.body.setOffset(o);
         this.body.setHead(this.pp);
     }
     public resize(width: number, height: number) {}
@@ -104,20 +126,20 @@ class MyBody extends Body {
         super();
         const offset = 0;
         const d = 15;
-        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "left",  0, 50, 0 + d * 2,  60, 50));
-        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "right", 0, 50, 60 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "left",  0, 60, 60 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 0, 60, 0 + d * 1,  70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  0, 60, 0,          80, 90));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 0, 60, 60,         80, 90));
+        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "left",  10, 50, 0 + d * 2,  60, 50));
+        this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "right", 10, 50, 60 + d * 2, 60, 50));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "left",  20, 60, 60 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 20, 60, 0 + d * 1,  70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  10, 60, 0,          80, 90));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 10, 60, 60,         80, 90));
         this.legs.forEach((o) => this.addChild(o));
-        window["setOffset"] = (o) => {
-            this.legs[0].setStepOffset(0 + o * 2);
-            this.legs[1].setStepOffset(60 + o * 2);
-            this.legs[2].setStepOffset(60 + o * 1);
-            this.legs[3].setStepOffset(0 + o * 1);
-            this.legs[4].setStepOffset(0);
-            this.legs[5].setStepOffset(60);
-        }
+    }
+    public setOffset(o: number) {
+        this.legs[0].setStepOffset(0 + o * 2);
+        this.legs[1].setStepOffset(60 + o * 2);
+        this.legs[2].setStepOffset(60 + o * 1);
+        this.legs[3].setStepOffset(0 + o * 1);
+        this.legs[4].setStepOffset(0);
+        this.legs[5].setStepOffset(60);
     }
 }
