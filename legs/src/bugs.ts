@@ -19,9 +19,8 @@ export class Body extends PIXI.Container {
     public D = 18;
     public bone: Pos[];
     public legs: Leg[] = [];
-    private interval: number = 10;
     private posStack: PosStack;
-    private L = 30;
+    private L = 60;
     private d: number = 0;
     constructor() {
         super();

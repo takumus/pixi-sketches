@@ -364,8 +364,7 @@
 	        var _this = _super.call(this) || this;
 	        _this.D = 18;
 	        _this.legs = [];
-	        _this.interval = 10;
-	        _this.L = 30;
+	        _this.L = 60;
 	        _this.d = 0;
 	        _this.canvas = new PIXI.Graphics();
 	        _this.addChild(_this.canvas);
