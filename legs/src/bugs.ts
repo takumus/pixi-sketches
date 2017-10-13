@@ -160,13 +160,13 @@ export class Leg extends PIXI.Graphics {
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
         let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
         r = r * r;
-        const a = 1 - r;
+        const a = (1 - r) * 0.6 + 0.4;
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
         this.lineStyle(1, 0x0000ff, a);
         this.moveTo(this.prevPos.x, this.prevPos.y);
         this.lineTo(this.nextPos.x, this.nextPos.y);
-        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
+        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, r == 1 ? 1 : a);
         this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
         
         const rootPos = this.body.bone[this.rootIndex];

@@ -42,9 +42,10 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var main_1 = __webpack_require__(1);
 	var renderer;
 	var stage = new PIXI.Container();
@@ -121,20 +122,26 @@
 	window.onload = init;
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var canvas_1 = __webpack_require__(2);
 	var bugs_1 = __webpack_require__(3);
 	var pos_1 = __webpack_require__(4);
-	var Main = (function (_super) {
+	var Main = /** @class */ (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
 	        return _super !== null && _super.apply(this, arguments) || this;
@@ -143,8 +150,13 @@
 	        this.body = new MyBody();
 	        this.body.scale.set(0.5, 0.5);
 	        this.addChild(this.body);
-	        this.offsetElem = document.getElementById("offset");
-	        this.autoElem = document.getElementById("auto");
+	        var props = {
+	            auto: true,
+	            offset: 30
+	        };
+	        var d = new dat.GUI();
+	        this.autoGUI = d.add(props, "auto");
+	        this.offsetGUI = d.add(props, "offset", -60, 60);
 	    };
 	    Main.prototype.mousedown = function () { };
 	    Main.prototype.mouseup = function () { };
@@ -156,18 +168,18 @@
 	        }
 	        var vx = mx - this.pp.x;
 	        var vy = my - this.pp.y;
-	        this.pp.x += vx * 0.07;
-	        this.pp.y += vy * 0.07;
+	        this.pp.x += vx * 0.04;
+	        this.pp.y += vy * 0.04;
 	        var v = Math.sqrt(vx * vx + vy * vy);
 	        var r = v / 500;
 	        r = r > 1 ? 1 : r;
 	        r = 1 - r;
 	        var o = Math.floor(r * 30);
-	        if (this.autoElem.checked) {
-	            this.offsetElem.value = o + "";
+	        if (this.autoGUI.getValue()) {
+	            this.offsetGUI.setValue(o);
 	        }
 	        else {
-	            o = Number(this.offsetElem.value);
+	            o = Number(this.offsetGUI.getValue());
 	        }
 	        this.body.setOffset(o);
 	        this.body.setHead(this.pp);
@@ -175,9 +187,8 @@
 	    Main.prototype.resize = function (width, height) { };
 	    return Main;
 	}(canvas_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
-	var MyLeg = (function (_super) {
+	var MyLeg = /** @class */ (function (_super) {
 	    __extends(MyLeg, _super);
 	    function MyLeg(body, stepDistance, targetRootIndex, rootIndex, directionFB, directionLR, rootPointDistanceFromBody, endPointDistanceFromBody, stepOffset, l1l, l2l) {
 	        var _this = _super.call(this, body) || this;
@@ -238,7 +249,7 @@
 	    };
 	    return MyLeg;
 	}(bugs_1.Leg));
-	var MyBody = (function (_super) {
+	var MyBody = /** @class */ (function (_super) {
 	    __extends(MyBody, _super);
 	    function MyBody() {
 	        var _this = _super.call(this) || this;
@@ -248,8 +259,8 @@
 	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "right", 10, 50, 60 + d * 2, 60, 50));
 	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "left", 20, 60, 60 + d * 1, 70, 80));
 	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 20, 60, 0 + d * 1, 70, 80));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 10, 60, 0, 80, 90));
-	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 10, 60, 60, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 10, 40, 0, 80, 90));
+	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 10, 40, 60, 80, 90));
 	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
@@ -265,17 +276,23 @@
 	}(bugs_1.Body));
 
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var Canvas = (function (_super) {
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var Canvas = /** @class */ (function (_super) {
 	    __extends(Canvas, _super);
 	    function Canvas() {
 	        var _this = _super.call(this) || this;
@@ -301,22 +318,27 @@
 	    };
 	    return Canvas;
 	}(PIXI.Container));
-	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Canvas;
 
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var pos_1 = __webpack_require__(4);
-	var PosStack = (function (_super) {
+	var PosStack = /** @class */ (function (_super) {
 	    __extends(PosStack, _super);
 	    function PosStack() {
 	        return _super !== null && _super.apply(this, arguments) || this;
@@ -336,7 +358,7 @@
 	    };
 	    return PosStack;
 	}(pos_1.default));
-	var Body = (function (_super) {
+	var Body = /** @class */ (function (_super) {
 	    __extends(Body, _super);
 	    function Body() {
 	        var _this = _super.call(this) || this;
@@ -417,7 +439,7 @@
 	    return Body;
 	}(PIXI.Container));
 	exports.Body = Body;
-	var Leg = (function (_super) {
+	var Leg = /** @class */ (function (_super) {
 	    __extends(Leg, _super);
 	    function Leg(body) {
 	        var _this = _super.call(this) || this;
@@ -479,13 +501,13 @@
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
 	        r = r * r;
-	        var a = 1 - r;
+	        var a = (1 - r) * 0.6 + 0.4;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
 	        this.lineStyle(1, 0x0000ff, a);
 	        this.moveTo(this.prevPos.x, this.prevPos.y);
 	        this.lineTo(this.nextPos.x, this.nextPos.y);
-	        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, 1);
+	        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, r == 1 ? 1 : a);
 	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
 	        var rootPos = this.body.bone[this.rootIndex];
 	        var fromPos = this.getRootPos(this.rootIndex);
@@ -545,12 +567,13 @@
 	exports.Leg = Leg;
 
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
-	var Pos = (function () {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var Pos = /** @class */ (function () {
 	    function Pos(x, y) {
 	        this.x = x;
 	        this.y = y;
@@ -567,9 +590,8 @@
 	    };
 	    return Pos;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Pos;
 
 
-/***/ }
+/***/ })
 /******/ ]);
