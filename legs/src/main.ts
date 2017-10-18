@@ -2,14 +2,14 @@ import Canvas from '../.src/canvas';
 import {Body, Leg} from './bugs';
 import Pos from './pos';
 export default class Main extends Canvas {
-    private body: MyBody;
+    private bodyRenderer: MyBodyRenderer;
     private pp: Pos;
     private offsetGUI: dat.GUIController;
     private autoGUI: dat.GUIController;
     public init() {
-        this.body = new MyBody();
-        this.body.scale.set(0.5, 0.5);
-        this.addChild(this.body);
+        this.bodyRenderer = new MyBodyRenderer();
+        this.bodyRenderer.scale.set(0.5, 0.5);
+        this.addChild(this.bodyRenderer);
 
         const props = {
             auto: true,
@@ -22,8 +22,8 @@ export default class Main extends Canvas {
     public mousedown() {}
     public mouseup() {}
     public draw() {
-        const mx = this.mouse.x * 1 / this.body.scale.x;
-        const my = this.mouse.y * 1 / this.body.scale.x;
+        const mx = this.mouse.x * 1 / this.bodyRenderer.scale.x;
+        const my = this.mouse.y * 1 / this.bodyRenderer.scale.x;
         if (!this.pp) {
             this.pp = new Pos(mx, my);
         }
@@ -42,8 +42,8 @@ export default class Main extends Canvas {
         }else {
             o = Number(this.offsetGUI.getValue());
         }
-        this.body.setOffset(o);
-        this.body.setHead(this.pp);
+        this.bodyRenderer.setOffset(o);
+        this.bodyRenderer.setHead(this.pp);
     }
     public resize(width: number, height: number) {}
 }
@@ -51,6 +51,9 @@ class MyLeg extends Leg {
     private directionFB: number;
     private l1l: number;
     private l2l: number;
+    public rootPos: Pos;
+    public middlePos: Pos;
+    public endPos: Pos;
     constructor(
         body: Body, 
         stepDistance: number, 
@@ -75,6 +78,9 @@ class MyLeg extends Leg {
         this.setRootIndex(rootIndex);
         this.setL1L(l1l);
         this.setL2L(l2l);
+        this.rootPos = new Pos(0, 0);
+        this.middlePos = new Pos(0, 0);
+        this.endPos = new Pos(0, 0);
     }
     public setL1L(value: number) {
         this.l1l = value;
@@ -85,7 +91,7 @@ class MyLeg extends Leg {
     public setDirectionFB(value: string) {
         this.directionFB = Math.floor(value=="front"?1:-1);
     }
-    protected drawLegs(fromPos: Pos, targetPos: Pos) {
+    protected calcLeg(fromPos: Pos, targetPos: Pos) {
         const poses = this.getLegPos(
             fromPos,
             targetPos,
@@ -93,16 +99,12 @@ class MyLeg extends Leg {
             this.directionFB,
             this.directionLR
         );
-        this.lineStyle(4, 0x666666);
-        this.moveTo(poses.begin.x, poses.begin.y);
-        this.lineTo(poses.middle.x, poses.middle.y);
-        this.lineStyle(2, 0x666666)
-        this.moveTo(poses.middle.x, poses.middle.y);
-        this.lineTo(poses.end.x, poses.end.y);
-        this.lineStyle();
-        this.beginFill(0x666666);
-        this.drawCircle(poses.middle.x, poses.middle.y, 2);
-        this.drawCircle(poses.end.x, poses.end.y, 3);
+        this.rootPos.x = poses.begin.x;
+        this.rootPos.y = poses.begin.y;
+        this.middlePos.x = poses.middle.x;
+        this.middlePos.y = poses.middle.y;
+        this.endPos.x = poses.end.x;
+        this.endPos.y = poses.end.y;
     }
     private getLegPos(fromPos: Pos, toPos: Pos, l1: number, l2: number, fb: number, lr: number) {
         const r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
@@ -126,6 +128,56 @@ class MyLeg extends Leg {
         };
     }
 }
+class MyBodyRenderer extends PIXI.Container {
+    private body: MyBody;
+    private canvas: PIXI.Graphics;
+    constructor() {
+        super();
+        this.body = new MyBody();
+        this.canvas = new PIXI.Graphics();
+        this.addChild(this.canvas);
+    }
+    public setHead(o: Pos) {
+        this.body.setHead(o);
+        this.canvas.clear();
+        this.canvas.lineStyle(1, 0xCCCCCC);
+        this.body.bone.forEach((p, id) => {
+            if (id == 0) {
+                this.canvas.moveTo(p.x, p.y);
+            }else {
+                this.canvas.lineTo(p.x, p.y);
+            }
+        });
+        this.body.bone.forEach((p, id) => {
+            this.canvas.beginFill(0x666666);
+            this.canvas.drawCircle(p.x, p.y, 2);
+        });
+        this.body.legs.forEach((leg: MyLeg) => {
+            this.canvas.lineStyle(4, 0x666666);
+            this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
+            this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
+            this.canvas.lineStyle(2, 0x666666)
+            this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
+            this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
+            this.canvas.lineStyle();
+            this.canvas.beginFill(0x666666);
+            this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
+            this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
+            this.canvas.endFill();
+
+            const a = (1 - leg.moveProgress) * 0.6 + 0.4;
+
+            this.canvas.lineStyle(1, 0x0000ff, a);
+            this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
+            this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
+            this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
+            this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+        })
+    }
+    public setOffset(o: number) {
+        this.body.setOffset(o);
+    }
+}
 class MyBody extends Body {
     constructor() {
         super();
@@ -137,7 +189,6 @@ class MyBody extends Body {
         this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 20, 60, 0 + d * 1,  70, 80));
         this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  10, 40, 0,          80, 90));
         this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 10, 40, 60,         80, 90));
-        this.legs.forEach((o) => this.addChild(o));
     }
     public setOffset(o: number) {
         this.legs[0].setStepOffset(0 + o * 2);

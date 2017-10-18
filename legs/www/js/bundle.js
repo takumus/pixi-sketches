@@ -53,7 +53,7 @@
 	var stageWidth = 0, stageHeight = 0;
 	var main = new main_1.default();
 	var init = function () {
-	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 1, transparent: true });
+	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 2, transparent: true });
 	    canvas = document.getElementById("content");
 	    canvas.appendChild(renderer.view);
 	    renderer.view.style.width = "100%";
@@ -147,9 +147,9 @@
 	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
 	    Main.prototype.init = function () {
-	        this.body = new MyBody();
-	        this.body.scale.set(0.5, 0.5);
-	        this.addChild(this.body);
+	        this.bodyRenderer = new MyBodyRenderer();
+	        this.bodyRenderer.scale.set(0.5, 0.5);
+	        this.addChild(this.bodyRenderer);
 	        var props = {
 	            auto: true,
 	            offset: 30
@@ -161,8 +161,8 @@
 	    Main.prototype.mousedown = function () { };
 	    Main.prototype.mouseup = function () { };
 	    Main.prototype.draw = function () {
-	        var mx = this.mouse.x * 1 / this.body.scale.x;
-	        var my = this.mouse.y * 1 / this.body.scale.x;
+	        var mx = this.mouse.x * 1 / this.bodyRenderer.scale.x;
+	        var my = this.mouse.y * 1 / this.bodyRenderer.scale.x;
 	        if (!this.pp) {
 	            this.pp = new pos_1.default(mx, my);
 	        }
@@ -181,8 +181,8 @@
 	        else {
 	            o = Number(this.offsetGUI.getValue());
 	        }
-	        this.body.setOffset(o);
-	        this.body.setHead(this.pp);
+	        this.bodyRenderer.setOffset(o);
+	        this.bodyRenderer.setHead(this.pp);
 	    };
 	    Main.prototype.resize = function (width, height) { };
 	    return Main;
@@ -202,6 +202,9 @@
 	        _this.setRootIndex(rootIndex);
 	        _this.setL1L(l1l);
 	        _this.setL2L(l2l);
+	        _this.rootPos = new pos_1.default(0, 0);
+	        _this.middlePos = new pos_1.default(0, 0);
+	        _this.endPos = new pos_1.default(0, 0);
 	        return _this;
 	    }
 	    MyLeg.prototype.setL1L = function (value) {
@@ -213,18 +216,14 @@
 	    MyLeg.prototype.setDirectionFB = function (value) {
 	        this.directionFB = Math.floor(value == "front" ? 1 : -1);
 	    };
-	    MyLeg.prototype.drawLegs = function (fromPos, targetPos) {
+	    MyLeg.prototype.calcLeg = function (fromPos, targetPos) {
 	        var poses = this.getLegPos(fromPos, targetPos, this.l1l, this.l2l, this.directionFB, this.directionLR);
-	        this.lineStyle(4, 0x666666);
-	        this.moveTo(poses.begin.x, poses.begin.y);
-	        this.lineTo(poses.middle.x, poses.middle.y);
-	        this.lineStyle(2, 0x666666);
-	        this.moveTo(poses.middle.x, poses.middle.y);
-	        this.lineTo(poses.end.x, poses.end.y);
-	        this.lineStyle();
-	        this.beginFill(0x666666);
-	        this.drawCircle(poses.middle.x, poses.middle.y, 2);
-	        this.drawCircle(poses.end.x, poses.end.y, 3);
+	        this.rootPos.x = poses.begin.x;
+	        this.rootPos.y = poses.begin.y;
+	        this.middlePos.x = poses.middle.x;
+	        this.middlePos.y = poses.middle.y;
+	        this.endPos.x = poses.end.x;
+	        this.endPos.y = poses.end.y;
 	    };
 	    MyLeg.prototype.getLegPos = function (fromPos, toPos, l1, l2, fb, lr) {
 	        var r = Math.atan2(toPos.y - fromPos.y, toPos.x - fromPos.x);
@@ -249,6 +248,57 @@
 	    };
 	    return MyLeg;
 	}(bugs_1.Leg));
+	var MyBodyRenderer = /** @class */ (function (_super) {
+	    __extends(MyBodyRenderer, _super);
+	    function MyBodyRenderer() {
+	        var _this = _super.call(this) || this;
+	        _this.body = new MyBody();
+	        _this.canvas = new PIXI.Graphics();
+	        _this.addChild(_this.canvas);
+	        return _this;
+	    }
+	    MyBodyRenderer.prototype.setHead = function (o) {
+	        var _this = this;
+	        this.body.setHead(o);
+	        this.canvas.clear();
+	        this.canvas.lineStyle(1, 0xCCCCCC);
+	        this.body.bone.forEach(function (p, id) {
+	            if (id == 0) {
+	                _this.canvas.moveTo(p.x, p.y);
+	            }
+	            else {
+	                _this.canvas.lineTo(p.x, p.y);
+	            }
+	        });
+	        this.body.bone.forEach(function (p, id) {
+	            _this.canvas.beginFill(0x666666);
+	            _this.canvas.drawCircle(p.x, p.y, 2);
+	        });
+	        this.body.legs.forEach(function (leg) {
+	            _this.canvas.lineStyle(4, 0x666666);
+	            _this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
+	            _this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
+	            _this.canvas.lineStyle(2, 0x666666);
+	            _this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
+	            _this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
+	            _this.canvas.lineStyle();
+	            _this.canvas.beginFill(0x666666);
+	            _this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
+	            _this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
+	            _this.canvas.endFill();
+	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
+	            _this.canvas.lineStyle(1, 0x0000ff, a);
+	            _this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
+	            _this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
+	            _this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
+	            _this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+	        });
+	    };
+	    MyBodyRenderer.prototype.setOffset = function (o) {
+	        this.body.setOffset(o);
+	    };
+	    return MyBodyRenderer;
+	}(PIXI.Container));
 	var MyBody = /** @class */ (function (_super) {
 	    __extends(MyBody, _super);
 	    function MyBody() {
@@ -261,7 +311,6 @@
 	        _this.legs.push(new MyLeg(_this, 120, offset + 12, offset + 12, "back", "right", 20, 60, 0 + d * 1, 70, 80));
 	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "left", 10, 40, 0, 80, 90));
 	        _this.legs.push(new MyLeg(_this, 120, offset + 17, offset + 17, "back", "right", 10, 40, 60, 80, 90));
-	        _this.legs.forEach(function (o) { return _this.addChild(o); });
 	        return _this;
 	    }
 	    MyBody.prototype.setOffset = function (o) {
@@ -358,17 +407,13 @@
 	    };
 	    return PosStack;
 	}(pos_1.default));
-	var Body = /** @class */ (function (_super) {
-	    __extends(Body, _super);
+	var Body = /** @class */ (function () {
 	    function Body() {
-	        var _this = _super.call(this) || this;
-	        _this.D = 18;
-	        _this.legs = [];
-	        _this.L = 60;
-	        _this.d = 0;
-	        _this.canvas = new PIXI.Graphics();
-	        _this.addChild(_this.canvas);
-	        return _this;
+	        this.D = 18;
+	        this.legs = [];
+	        this.L = 60;
+	        this.d = 0;
+	        this.canvas = new PIXI.Graphics();
 	    }
 	    Body.prototype.setHead = function (pos) {
 	        var _this = this;
@@ -436,20 +481,19 @@
 	        this.legs.forEach(function (l) { return l.setMoveDistance(_this.d); });
 	    };
 	    return Body;
-	}(PIXI.Container));
+	}());
 	exports.Body = Body;
-	var Leg = /** @class */ (function (_super) {
-	    __extends(Leg, _super);
+	var Leg = /** @class */ (function () {
 	    function Leg(body) {
-	        var _this = _super.call(this) || this;
-	        _this.step = 0;
-	        _this.sid2 = 0;
-	        _this.c = 0xff5500;
-	        _this.nowPos = new pos_1.default(0, 0);
-	        _this.nextPos = new pos_1.default(0, 0);
-	        _this.prevPos = new pos_1.default(0, 0);
-	        _this.setBody(body);
-	        return _this;
+	        this.step = 0;
+	        this.sid2 = 0;
+	        this.c = 0xff5500;
+	        this.nowPos = new pos_1.default(0, 0);
+	        this.nextPos = new pos_1.default(0, 0);
+	        this.prevPos = new pos_1.default(0, 0);
+	        this._beginMovePos = new pos_1.default(0, 0);
+	        this._endMovePos = new pos_1.default(0, 0);
+	        this.setBody(body);
 	    }
 	    Leg.prototype.setEndPointDistanceFromBody = function (value) {
 	        this.endPointDistanceFromBody = value;
@@ -496,29 +540,27 @@
 	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
 	            }
 	        }
-	        this.clear();
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
 	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-	        r = r * r;
-	        var a = (1 - r) * 0.6 + 0.4;
+	        r = Math.pow(r, 1.5);
+	        this._moveProgress = r;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-	        this.lineStyle(1, 0x0000ff, a);
-	        this.moveTo(this.prevPos.x, this.prevPos.y);
-	        this.lineTo(this.nextPos.x, this.nextPos.y);
-	        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, r == 1 ? 1 : a);
-	        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
+	        this._beginMovePos.x = this.prevPos.x;
+	        this._beginMovePos.y = this.prevPos.y;
+	        this._endMovePos.x = this.nextPos.x;
+	        this._endMovePos.y = this.nextPos.y;
 	        var rootPos = this.body.bone[this.rootIndex];
 	        var fromPos = this.getRootPos(this.rootIndex);
 	        if (fromPos && rootPos) {
-	            this.lineStyle();
-	            this.beginFill(0x333333);
-	            this.drawCircle(fromPos.x, fromPos.y, 3);
-	            this.endFill();
-	            this.lineStyle(1, 0x666666);
-	            this.moveTo(rootPos.x, rootPos.y);
-	            this.lineTo(fromPos.x, fromPos.y);
-	            this.drawLegs(fromPos, this.nowPos);
+	            //this.lineStyle();
+	            //this.beginFill(0x333333);
+	            //this.drawCircle(fromPos.x, fromPos.y, 3);
+	            //this.endFill();
+	            //this.lineStyle(1, 0x666666);
+	            //this.moveTo(rootPos.x, rootPos.y);
+	            //this.lineTo(fromPos.x, fromPos.y);
+	            this.calcLeg(fromPos, this.nowPos);
 	        }
 	    };
 	    Leg.prototype.getRootPos = function (baseId) {
@@ -538,7 +580,28 @@
 	        var dy = ddy / D;
 	        return new pos_1.default(basePos.x + -this.directionLR * dy * this.rootPointDistanceFromBody, basePos.y + this.directionLR * dx * this.rootPointDistanceFromBody);
 	    };
-	    Leg.prototype.drawLegs = function (fromPos, targetPos) { };
+	    Leg.prototype.calcLeg = function (fromPos, targetPos) { };
+	    Object.defineProperty(Leg.prototype, "moveProgress", {
+	        get: function () {
+	            return this._moveProgress;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Leg.prototype, "beginMovePos", {
+	        get: function () {
+	            return this._beginMovePos;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Leg.prototype, "endMovePos", {
+	        get: function () {
+	            return this._endMovePos;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Leg.prototype.getTargetPos = function (id, d, length) {
 	        var bp = this.body.bone[id];
 	        var fp = this.body.bone[id];
@@ -562,7 +625,7 @@
 	        return bp;
 	    };
 	    return Leg;
-	}(PIXI.Graphics));
+	}());
 	exports.Leg = Leg;
 
 

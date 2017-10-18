@@ -14,7 +14,7 @@ class PosStack extends Pos {
         return new PosStack(pos.x, pos.y);
     }
 }
-export class Body extends PIXI.Container {
+export class Body {
     public canvas: PIXI.Graphics;
     public D = 18;
     public bone: Pos[];
@@ -23,9 +23,7 @@ export class Body extends PIXI.Container {
     private L = 60;
     private d: number = 0;
     constructor() {
-        super();
         this.canvas = new PIXI.Graphics();
-        this.addChild(this.canvas);
     }
     public setHead(pos: Pos) {
         const np = PosStack.fromPos(pos);
@@ -87,7 +85,7 @@ export class Body extends PIXI.Container {
         this.legs.forEach((l) => l.setMoveDistance(this.d));
     }
 }
-export class Leg extends PIXI.Graphics {
+export class Leg{
     private stepDistance: number;
     private stepDistanceHalf: number;
     private step: number = 0;
@@ -104,11 +102,15 @@ export class Leg extends PIXI.Graphics {
     private stepOffset: number;
     private endPointDistanceFromBody: number;
     private rootPointDistanceFromBody: number;
+    private _beginMovePos: Pos;
+    private _endMovePos: Pos;
+    private _moveProgress: number;
     constructor(body: Body) {
-        super();
         this.nowPos = new Pos(0, 0);
         this.nextPos = new Pos(0, 0);
         this.prevPos = new Pos(0, 0);
+        this._beginMovePos = new Pos(0, 0);
+        this._endMovePos = new Pos(0, 0);
         this.setBody(body);
     }
     public setEndPointDistanceFromBody(value: number): void {
@@ -155,30 +157,29 @@ export class Leg extends PIXI.Graphics {
                 this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
             }
         }
-        this.clear();
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
         let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-        r = r * r;
-        const a = (1 - r) * 0.6 + 0.4;
+        r = Math.pow(r, 1.5);
+        this._moveProgress = r;
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;
-        this.lineStyle(1, 0x0000ff, a);
-        this.moveTo(this.prevPos.x, this.prevPos.y);
-        this.lineTo(this.nextPos.x, this.nextPos.y);
-        this.lineStyle(1, r == 1 ? 0xff0000 : 0x0000ff, r == 1 ? 1 : a);
-        this.drawRect(this.nextPos.x - 5, this.nextPos.y - 5, 10, 10);
         
+        this._beginMovePos.x = this.prevPos.x;
+        this._beginMovePos.y = this.prevPos.y;
+        this._endMovePos.x = this.nextPos.x;
+        this._endMovePos.y = this.nextPos.y;
+
         const rootPos = this.body.bone[this.rootIndex];
         const fromPos = this.getRootPos(this.rootIndex);
         if (fromPos && rootPos) {
-            this.lineStyle();
-            this.beginFill(0x333333);
-            this.drawCircle(fromPos.x, fromPos.y, 3);
-            this.endFill();
-            this.lineStyle(1, 0x666666);
-            this.moveTo(rootPos.x, rootPos.y);
-            this.lineTo(fromPos.x, fromPos.y);
-            this.drawLegs(fromPos, this.nowPos);
+            //this.lineStyle();
+            //this.beginFill(0x333333);
+            //this.drawCircle(fromPos.x, fromPos.y, 3);
+            //this.endFill();
+            //this.lineStyle(1, 0x666666);
+            //this.moveTo(rootPos.x, rootPos.y);
+            //this.lineTo(fromPos.x, fromPos.y);
+            this.calcLeg(fromPos, this.nowPos);
         }
     }
     private getRootPos(baseId: number) {
@@ -200,7 +201,16 @@ export class Leg extends PIXI.Graphics {
             basePos.y + this.directionLR * dx * this.rootPointDistanceFromBody
         )
     }
-    protected drawLegs(fromPos: Pos, targetPos: Pos): void {}
+    protected calcLeg(fromPos: Pos, targetPos: Pos): void {}
+    public get moveProgress() {
+        return this._moveProgress;
+    }
+    public get beginMovePos() {
+        return this._beginMovePos;
+    }
+    public get endMovePos() {
+        return this._endMovePos;
+    }
     private getTargetPos(id: number, d: number, length: number): Pos {
         let bp = this.body.bone[id];
         let fp: Pos = this.body.bone[id];
