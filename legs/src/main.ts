@@ -1,6 +1,7 @@
 import Canvas from '../.src/canvas';
 import {Body, Leg} from './bugs';
 import Pos from './pos';
+import ShapeDrawer from './drawer';
 export default class Main extends Canvas {
     private bodyRenderer: MyBodyRenderer;
     private pp: Pos;
@@ -8,7 +9,7 @@ export default class Main extends Canvas {
     private autoGUI: dat.GUIController;
     public init() {
         this.bodyRenderer = new MyBodyRenderer();
-        this.bodyRenderer.scale.set(0.5, 0.5);
+        this.bodyRenderer.scale.set(0.8, 0.8);
         this.addChild(this.bodyRenderer);
 
         const props = {
@@ -153,6 +154,7 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.drawCircle(p.x, p.y, 2);
         });
         this.body.legs.forEach((leg: MyLeg) => {
+            /*
             this.canvas.lineStyle(4, 0x666666);
             this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
             this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
@@ -163,8 +165,21 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.beginFill(0x666666);
             this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
             this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
-            this.canvas.endFill();
+            this.canvas.endFill();*/
 
+            ShapeDrawer.drawLine(
+                this.canvas,
+                leg.rootPos,
+                leg.middlePos,
+                40, 20, 0x666666, 50, ShapeDrawer.lineStyle.sin
+            );
+            ShapeDrawer.drawLine(
+                this.canvas,
+                leg.middlePos,
+                leg.endPos,
+                20, 10, 0x666666, 50, ShapeDrawer.lineStyle.sin
+            );
+            /*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;
 
             this.canvas.lineStyle(1, 0x0000ff, a);
@@ -172,6 +187,7 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
             this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
             this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+            */
         })
     }
     public setOffset(o: number) {

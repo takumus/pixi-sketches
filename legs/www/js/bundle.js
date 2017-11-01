@@ -141,6 +141,7 @@
 	var canvas_1 = __webpack_require__(2);
 	var bugs_1 = __webpack_require__(3);
 	var pos_1 = __webpack_require__(4);
+	var drawer_1 = __webpack_require__(5);
 	var Main = /** @class */ (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
@@ -148,7 +149,7 @@
 	    }
 	    Main.prototype.init = function () {
 	        this.bodyRenderer = new MyBodyRenderer();
-	        this.bodyRenderer.scale.set(0.5, 0.5);
+	        this.bodyRenderer.scale.set(0.8, 0.8);
 	        this.addChild(this.bodyRenderer);
 	        var props = {
 	            auto: true,
@@ -275,23 +276,29 @@
 	            _this.canvas.drawCircle(p.x, p.y, 2);
 	        });
 	        this.body.legs.forEach(function (leg) {
-	            _this.canvas.lineStyle(4, 0x666666);
-	            _this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
-	            _this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
-	            _this.canvas.lineStyle(2, 0x666666);
-	            _this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
-	            _this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
-	            _this.canvas.lineStyle();
-	            _this.canvas.beginFill(0x666666);
-	            _this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
-	            _this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
-	            _this.canvas.endFill();
-	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
-	            _this.canvas.lineStyle(1, 0x0000ff, a);
-	            _this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
-	            _this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
-	            _this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
-	            _this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+	            /*
+	            this.canvas.lineStyle(4, 0x666666);
+	            this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
+	            this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
+	            this.canvas.lineStyle(2, 0x666666)
+	            this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
+	            this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
+	            this.canvas.lineStyle();
+	            this.canvas.beginFill(0x666666);
+	            this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
+	            this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
+	            this.canvas.endFill();*/
+	            drawer_1.default.drawLine(_this.canvas, leg.rootPos, leg.middlePos, 40, 20, 0x666666, 50, drawer_1.default.lineStyle.sin);
+	            drawer_1.default.drawLine(_this.canvas, leg.middlePos, leg.endPos, 20, 10, 0x666666, 50, drawer_1.default.lineStyle.sin);
+	            /*
+	            const a = (1 - leg.moveProgress) * 0.6 + 0.4;
+
+	            this.canvas.lineStyle(1, 0x0000ff, a);
+	            this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
+	            this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
+	            this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
+	            this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+	            */
 	        });
 	    };
 	    MyBodyRenderer.prototype.setOffset = function (o) {
@@ -646,6 +653,51 @@
 	    return Pos;
 	}());
 	exports.default = Pos;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var ShapeDrawer = /** @class */ (function () {
+	    function ShapeDrawer() {
+	    }
+	    ShapeDrawer.drawLine = function (graphics, fromPos, toPos, fromThickness, toThickness, color, boneLength, style) {
+	        if (style === void 0) { style = ShapeDrawer.lineStyle.normal; }
+	        var dx = toPos.x - fromPos.x;
+	        var dy = toPos.y - fromPos.y;
+	        var D = Math.sqrt(dx * dx + dy * dy);
+	        var ii = 1 / boneLength;
+	        for (var i = 0; i < 1; i += ii) {
+	            this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i);
+	        }
+	        this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, 1);
+	        graphics.lineStyle();
+	        graphics.beginFill(color);
+	        graphics.drawCircle(fromPos.x, fromPos.y, fromThickness / 2);
+	        graphics.drawCircle(toPos.x, toPos.y, toThickness / 2);
+	    };
+	    ShapeDrawer._drawLine = function (graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i) {
+	        var dt = toThickness - fromThickness;
+	        graphics.lineStyle(fromThickness + dt * style(i), color);
+	        if (i == 0) {
+	            graphics.moveTo(fromPos.x, fromPos.y);
+	        }
+	        else {
+	            graphics.lineTo(fromPos.x + dx * i, fromPos.y + dy * i);
+	        }
+	    };
+	    ShapeDrawer.lineStyle = {
+	        normal: function (n) { return n; },
+	        sin: function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; },
+	        sineHalfB: function (n) { return Math.sin(n * Math.PI / 2); },
+	        sineHalfA: function (n) { return Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1; }
+	    };
+	    return ShapeDrawer;
+	}());
+	exports.default = ShapeDrawer;
 
 
 /***/ })
