@@ -28,7 +28,7 @@ export class Body {
     public setHead(pos: Pos) {
         const np = PosStack.fromPos(pos);
         if (this.posStack) {
-            if (np.distance(this.posStack) > 1) {
+            if (np.distance(this.posStack) > 0) {
                 this.d += np.distance(this.posStack);
                 np.next = this.posStack;
                 this.posStack = np;
@@ -172,13 +172,6 @@ export class Leg{
         const rootPos = this.body.bone[this.rootIndex];
         const fromPos = this.getRootPos(this.rootIndex);
         if (fromPos && rootPos) {
-            //this.lineStyle();
-            //this.beginFill(0x333333);
-            //this.drawCircle(fromPos.x, fromPos.y, 3);
-            //this.endFill();
-            //this.lineStyle(1, 0x666666);
-            //this.moveTo(rootPos.x, rootPos.y);
-            //this.lineTo(fromPos.x, fromPos.y);
             this.calcLeg(fromPos, this.nowPos);
         }
     }
