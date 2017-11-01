@@ -132,6 +132,7 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var canvas_1 = __webpack_require__(2);
+	var pos_1 = __webpack_require__(3);
 	var Main = (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
@@ -140,6 +141,8 @@
 	    Main.prototype.init = function () {
 	    };
 	    Main.prototype.draw = function () {
+	        this.canvas.clear();
+	        ShapeDrawer.drawLine(this.canvas, new pos_1.default(60, 100), new pos_1.default(this.mouse.x, this.mouse.y), 10, 60, 0xff0000, 100, ShapeDrawer.lineStyle.sin);
 	    };
 	    Main.prototype.mousedown = function () {
 	    };
@@ -153,6 +156,40 @@
 	}(canvas_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
+	var ShapeDrawer = (function () {
+	    function ShapeDrawer() {
+	    }
+	    ShapeDrawer.drawLine = function (graphics, fromPos, toPos, fromThickness, toThickness, color, boneLength, style) {
+	        if (style === void 0) { style = ShapeDrawer.lineStyle.normal; }
+	        var dx = toPos.x - fromPos.x;
+	        var dy = toPos.y - fromPos.y;
+	        var D = Math.sqrt(dx * dx + dy * dy);
+	        var ii = 1 / boneLength;
+	        for (var i = 0; i < 1; i += ii) {
+	            this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i);
+	        }
+	        this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, 1);
+	        graphics.lineStyle();
+	        graphics.beginFill(color);
+	        graphics.drawCircle(fromPos.x, fromPos.y, fromThickness / 2);
+	        graphics.drawCircle(toPos.x, toPos.y, toThickness / 2);
+	    };
+	    ShapeDrawer._drawLine = function (graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i) {
+	        var dt = toThickness - fromThickness;
+	        graphics.lineStyle(fromThickness + dt * style(i), color);
+	        if (i == 0) {
+	            graphics.moveTo(fromPos.x, fromPos.y);
+	        }
+	        else {
+	            graphics.lineTo(fromPos.x + dx * i, fromPos.y + dy * i);
+	        }
+	    };
+	    return ShapeDrawer;
+	}());
+	ShapeDrawer.lineStyle = {
+	    normal: function (n) { return n; },
+	    sin: function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; }
+	};
 
 
 /***/ },
@@ -193,6 +230,32 @@
 	}(PIXI.Container));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Canvas;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Pos = (function () {
+	    function Pos(x, y) {
+	        this.x = x;
+	        this.y = y;
+	    }
+	    Pos.prototype.clone = function () {
+	        return new Pos(this.x, this.y);
+	    };
+	    Pos.prototype.distance = function (pos) {
+	        return Math.sqrt((pos.x - this.x) * (pos.x - this.x) + (pos.y - this.y) * (pos.y - this.y));
+	    };
+	    Pos.prototype.copyTo = function (pos) {
+	        pos.x = this.x;
+	        pos.y = this.y;
+	    };
+	    return Pos;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Pos;
 
 
 /***/ }
