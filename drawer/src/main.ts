@@ -29,7 +29,9 @@ export default class Main extends Canvas {
 class ShapeDrawer {
     public static lineStyle = {
         normal: (n: number) => n,
-        sin: (n: number) => (Math.cos(n * Math.PI + Math.PI) + 1) / 2
+        sin: (n: number) => (Math.cos(n * Math.PI + Math.PI) + 1) / 2,
+        sineHalfB: (n: number) => Math.sin(n * Math.PI / 2),
+        sineHalfA: (n: number) => Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1
     }
     public static drawLine(
         graphics: PIXI.Graphics,

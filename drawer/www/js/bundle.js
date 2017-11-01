@@ -188,7 +188,9 @@
 	}());
 	ShapeDrawer.lineStyle = {
 	    normal: function (n) { return n; },
-	    sin: function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; }
+	    sin: function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; },
+	    sineHalfB: function (n) { return Math.sin(n * Math.PI / 2); },
+	    sineHalfA: function (n) { return Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1; }
 	};
 
 
