@@ -171,13 +171,13 @@ class MyBodyRenderer extends PIXI.Container {
                 this.canvas,
                 leg.rootPos,
                 leg.middlePos,
-                40, 20, 0x666666, 50, ShapeDrawer.lineStyle.sin
+                40, 20, 0x666666, 30, ShapeDrawer.lineStyle.sin
             );
             ShapeDrawer.drawLine(
                 this.canvas,
                 leg.middlePos,
                 leg.endPos,
-                20, 10, 0x666666, 50, ShapeDrawer.lineStyle.sin
+                20, 10, 0x666666, 30, ShapeDrawer.lineStyle.sin
             );
             /*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;

@@ -53,7 +53,7 @@
 	var stageWidth = 0, stageHeight = 0;
 	var main = new main_1.default();
 	var init = function () {
-	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 2, transparent: true });
+	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 1, transparent: true });
 	    canvas = document.getElementById("content");
 	    canvas.appendChild(renderer.view);
 	    renderer.view.style.width = "100%";
@@ -288,8 +288,8 @@
 	            this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
 	            this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
 	            this.canvas.endFill();*/
-	            drawer_1.default.drawLine(_this.canvas, leg.rootPos, leg.middlePos, 40, 20, 0x666666, 50, drawer_1.default.lineStyle.sin);
-	            drawer_1.default.drawLine(_this.canvas, leg.middlePos, leg.endPos, 20, 10, 0x666666, 50, drawer_1.default.lineStyle.sin);
+	            drawer_1.default.drawLine(_this.canvas, leg.rootPos, leg.middlePos, 40, 20, 0x666666, 30, drawer_1.default.lineStyle.sin);
+	            drawer_1.default.drawLine(_this.canvas, leg.middlePos, leg.endPos, 20, 10, 0x666666, 30, drawer_1.default.lineStyle.sin);
 	            /*
 	            const a = (1 - leg.moveProgress) * 0.6 + 0.4;
 
