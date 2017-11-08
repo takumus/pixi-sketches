@@ -1,7 +1,7 @@
 import Canvas from '../.src/canvas';
 import {Body, Leg} from './bugs';
 import Pos from './pos';
-import ShapeDrawer from './drawer';
+import {ShapeDrawer} from './drawer';
 export default class Main extends Canvas {
     private bodyRenderer: MyBodyRenderer;
     private pp: Pos;
@@ -152,28 +152,16 @@ class MyBodyRenderer extends PIXI.Container {
         this.body.bone.forEach((p, id) => {
             this.canvas.beginFill(0x666666);
             this.canvas.drawCircle(p.x, p.y, 2);
+            this.canvas.endFill();
         });
         this.body.legs.forEach((leg: MyLeg) => {
-            /*
-            ShapeDrawer.drawLine(
-                this.canvas,
-                leg.rootPos,
-                leg.middlePos,
-                40, 20, 0x666666, 20, ShapeDrawer.lineStyle.sin
-            );
-            ShapeDrawer.drawLine(
-                this.canvas,
-                leg.middlePos,
-                leg.endPos,
-                20, 10, 0x666666, 20, ShapeDrawer.lineStyle.sin
-            );*/
-
+            this.canvas.lineStyle();
             ShapeDrawer.drawMuscleLine(
                 this.canvas,
                 [
                     {
                         pos: leg.rootPos,
-                        radius: 10,
+                        radius: 20,
                         ratio: 1
                     },
                     {
@@ -183,17 +171,16 @@ class MyBodyRenderer extends PIXI.Container {
                     },
                     {
                         pos: leg.endPos,
-                        radius: 10,
+                        radius: 5,
                         ratio: 1
                     }
                 ],
+                [ShapeDrawer.lineStyle.sin, ShapeDrawer.lineStyle.sin],
                 0x666666,
-                1
+                10
             );
-
             ///*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;
-
             this.canvas.lineStyle(1, 0x0000ff, a);
             this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
             this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);

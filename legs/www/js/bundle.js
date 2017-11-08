@@ -274,25 +274,14 @@
 	        this.body.bone.forEach(function (p, id) {
 	            _this.canvas.beginFill(0x666666);
 	            _this.canvas.drawCircle(p.x, p.y, 2);
+	            _this.canvas.endFill();
 	        });
 	        this.body.legs.forEach(function (leg) {
-	            /*
-	            ShapeDrawer.drawLine(
-	                this.canvas,
-	                leg.rootPos,
-	                leg.middlePos,
-	                40, 20, 0x666666, 20, ShapeDrawer.lineStyle.sin
-	            );
-	            ShapeDrawer.drawLine(
-	                this.canvas,
-	                leg.middlePos,
-	                leg.endPos,
-	                20, 10, 0x666666, 20, ShapeDrawer.lineStyle.sin
-	            );*/
-	            drawer_1.default.drawMuscleLine(_this.canvas, [
+	            _this.canvas.lineStyle();
+	            drawer_1.ShapeDrawer.drawMuscleLine(_this.canvas, [
 	                {
 	                    pos: leg.rootPos,
-	                    radius: 10,
+	                    radius: 20,
 	                    ratio: 1
 	                },
 	                {
@@ -302,10 +291,10 @@
 	                },
 	                {
 	                    pos: leg.endPos,
-	                    radius: 10,
+	                    radius: 5,
 	                    ratio: 1
 	                }
-	            ], 0x666666, 1);
+	            ], [drawer_1.ShapeDrawer.lineStyle.sin, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 10);
 	            ///*
 	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
 	            _this.canvas.lineStyle(1, 0x0000ff, a);
@@ -687,22 +676,51 @@
 	var ShapeDrawer = /** @class */ (function () {
 	    function ShapeDrawer() {
 	    }
-	    ShapeDrawer.drawMuscleLine = function (graphics, kelps, color, resolution) {
-	        for (var i = 0; i < kelps.length - 1; i++) {
+	    ShapeDrawer.drawMuscleLine = function (graphics, kelps, styles, color, resolution) {
+	        for (var i = 0; i < kelps.length; i++) {
 	            var fk = kelps[i];
-	            var tk = kelps[i + 1];
-	            this._drawLine2(graphics, fk, tk, color, resolution);
+	            if (i < kelps.length - 1) {
+	                var tk = kelps[i + 1];
+	                this._drawLine2(graphics, fk, tk, color, resolution, styles[i]);
+	            }
+	            graphics.lineStyle();
+	            graphics.beginFill(color);
+	            graphics.drawCircle(fk.pos.x, fk.pos.y, fk.radius);
+	            graphics.endFill();
 	        }
 	    };
-	    ShapeDrawer._drawLine2 = function (graphics, fromKelp, toKelp, color, resolution) {
+	    ShapeDrawer._drawLine2 = function (graphics, fromKelp, toKelp, color, resolution, style) {
 	        var dx = toKelp.pos.x - fromKelp.pos.x;
 	        var dy = toKelp.pos.y - fromKelp.pos.y;
 	        var d = Math.sqrt(dx * dx + dy * dy);
 	        var vx = dx / d;
 	        var vy = dy / d;
-	        graphics.lineStyle(10, 0);
-	        graphics.moveTo(fromKelp.pos.x, fromKelp.pos.y);
-	        graphics.lineTo(toKelp.pos.x, toKelp.pos.y);
+	        graphics.beginFill(color);
+	        var vxA = -vy;
+	        var vyA = vx;
+	        var dr = toKelp.radius - fromKelp.radius;
+	        for (var a = 0; a <= resolution; a++) {
+	            var r = a / resolution;
+	            var rr = style(r);
+	            var radius = fromKelp.radius + dr * rr;
+	            var x = fromKelp.pos.x + dx * r + vxA * radius;
+	            var y = fromKelp.pos.y + dy * r + vyA * radius;
+	            if (a == 0) {
+	                graphics.moveTo(x, y);
+	                continue;
+	            }
+	            graphics.lineTo(x, y);
+	        }
+	        var vxB = vy;
+	        var vyB = -vx;
+	        for (var b = 0; b <= resolution; b++) {
+	            var r = (1 - b / resolution);
+	            var rr = style(r);
+	            var radius = fromKelp.radius + dr * rr;
+	            var x = fromKelp.pos.x + dx * r + vxB * radius;
+	            var y = fromKelp.pos.y + dy * r + vyB * radius;
+	            graphics.lineTo(x, y);
+	        }
 	    };
 	    ShapeDrawer.drawLine = function (graphics, fromPos, toPos, fromThickness, toThickness, color, boneLength, style) {
 	        if (style === void 0) { style = ShapeDrawer.lineStyle.normal; }
@@ -737,7 +755,7 @@
 	    };
 	    return ShapeDrawer;
 	}());
-	exports.default = ShapeDrawer;
+	exports.ShapeDrawer = ShapeDrawer;
 
 
 /***/ })
