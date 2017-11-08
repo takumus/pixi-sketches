@@ -53,7 +53,7 @@
 	var stageWidth = 0, stageHeight = 0;
 	var main = new main_1.default();
 	var init = function () {
-	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: window.devicePixelRatio, transparent: true });
+	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 1, transparent: true });
 	    canvas = document.getElementById("content");
 	    canvas.appendChild(renderer.view);
 	    renderer.view.style.width = "100%";
