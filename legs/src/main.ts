@@ -155,31 +155,43 @@ class MyBodyRenderer extends PIXI.Container {
         });
         this.body.legs.forEach((leg: MyLeg) => {
             /*
-            this.canvas.lineStyle(4, 0x666666);
-            this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
-            this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
-            this.canvas.lineStyle(2, 0x666666)
-            this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
-            this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
-            this.canvas.lineStyle();
-            this.canvas.beginFill(0x666666);
-            this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
-            this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
-            this.canvas.endFill();*/
-
             ShapeDrawer.drawLine(
                 this.canvas,
                 leg.rootPos,
                 leg.middlePos,
-                40, 20, 0x666666, 30, ShapeDrawer.lineStyle.sin
+                40, 20, 0x666666, 20, ShapeDrawer.lineStyle.sin
             );
             ShapeDrawer.drawLine(
                 this.canvas,
                 leg.middlePos,
                 leg.endPos,
-                20, 10, 0x666666, 30, ShapeDrawer.lineStyle.sin
+                20, 10, 0x666666, 20, ShapeDrawer.lineStyle.sin
+            );*/
+
+            ShapeDrawer.drawMuscleLine(
+                this.canvas,
+                [
+                    {
+                        pos: leg.rootPos,
+                        radius: 10,
+                        ratio: 1
+                    },
+                    {
+                        pos: leg.middlePos,
+                        radius: 10,
+                        ratio: 1
+                    },
+                    {
+                        pos: leg.endPos,
+                        radius: 10,
+                        ratio: 1
+                    }
+                ],
+                0x666666,
+                1
             );
-            /*
+
+            ///*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;
 
             this.canvas.lineStyle(1, 0x0000ff, a);
@@ -187,7 +199,7 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
             this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
             this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
-            */
+            //*/
         })
     }
     public setOffset(o: number) {
@@ -195,8 +207,9 @@ class MyBodyRenderer extends PIXI.Container {
     }
 }
 class MyBody extends Body {
+    public legs: MyLeg[] = [];
     constructor() {
-        super();
+        super(18, 60);
         const offset = 0;
         const d = 15;
         this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "left",  10, 50, 0 + d * 2,  60, 50));
@@ -213,5 +226,8 @@ class MyBody extends Body {
         this.legs[3].setStepOffset(0 + o * 1);
         this.legs[4].setStepOffset(0);
         this.legs[5].setStepOffset(60);
+    }
+    public move(moved) {
+        this.legs.forEach((l) => l.setMoveDistance(moved));
     }
 }

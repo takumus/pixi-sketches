@@ -277,28 +277,43 @@
 	        });
 	        this.body.legs.forEach(function (leg) {
 	            /*
-	            this.canvas.lineStyle(4, 0x666666);
-	            this.canvas.moveTo(leg.rootPos.x, leg.rootPos.y);
-	            this.canvas.lineTo(leg.middlePos.x, leg.middlePos.y);
-	            this.canvas.lineStyle(2, 0x666666)
-	            this.canvas.moveTo(leg.middlePos.x, leg.middlePos.y);
-	            this.canvas.lineTo(leg.endPos.x, leg.endPos.y);
-	            this.canvas.lineStyle();
-	            this.canvas.beginFill(0x666666);
-	            this.canvas.drawCircle(leg.middlePos.x, leg.middlePos.y, 2);
-	            this.canvas.drawCircle(leg.endPos.x, leg.endPos.y, 3);
-	            this.canvas.endFill();*/
-	            drawer_1.default.drawLine(_this.canvas, leg.rootPos, leg.middlePos, 40, 20, 0x666666, 30, drawer_1.default.lineStyle.sin);
-	            drawer_1.default.drawLine(_this.canvas, leg.middlePos, leg.endPos, 20, 10, 0x666666, 30, drawer_1.default.lineStyle.sin);
-	            /*
-	            const a = (1 - leg.moveProgress) * 0.6 + 0.4;
-
-	            this.canvas.lineStyle(1, 0x0000ff, a);
-	            this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
-	            this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
-	            this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
-	            this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
-	            */
+	            ShapeDrawer.drawLine(
+	                this.canvas,
+	                leg.rootPos,
+	                leg.middlePos,
+	                40, 20, 0x666666, 20, ShapeDrawer.lineStyle.sin
+	            );
+	            ShapeDrawer.drawLine(
+	                this.canvas,
+	                leg.middlePos,
+	                leg.endPos,
+	                20, 10, 0x666666, 20, ShapeDrawer.lineStyle.sin
+	            );*/
+	            drawer_1.default.drawMuscleLine(_this.canvas, [
+	                {
+	                    pos: leg.rootPos,
+	                    radius: 10,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: leg.middlePos,
+	                    radius: 10,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: leg.endPos,
+	                    radius: 10,
+	                    ratio: 1
+	                }
+	            ], 0x666666, 1);
+	            ///*
+	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
+	            _this.canvas.lineStyle(1, 0x0000ff, a);
+	            _this.canvas.moveTo(leg.beginMovePos.x, leg.beginMovePos.y);
+	            _this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
+	            _this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
+	            _this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+	            //*/
 	        });
 	    };
 	    MyBodyRenderer.prototype.setOffset = function (o) {
@@ -309,7 +324,8 @@
 	var MyBody = /** @class */ (function (_super) {
 	    __extends(MyBody, _super);
 	    function MyBody() {
-	        var _this = _super.call(this) || this;
+	        var _this = _super.call(this, 18, 60) || this;
+	        _this.legs = [];
 	        var offset = 0;
 	        var d = 15;
 	        _this.legs.push(new MyLeg(_this, 120, offset, offset + 8, "front", "left", 10, 50, 0 + d * 2, 60, 50));
@@ -327,6 +343,9 @@
 	        this.legs[3].setStepOffset(0 + o * 1);
 	        this.legs[4].setStepOffset(0);
 	        this.legs[5].setStepOffset(60);
+	    };
+	    MyBody.prototype.move = function (moved) {
+	        this.legs.forEach(function (l) { return l.setMoveDistance(moved); });
 	    };
 	    return MyBody;
 	}(bugs_1.Body));
@@ -415,18 +434,39 @@
 	    return PosStack;
 	}(pos_1.default));
 	var Body = /** @class */ (function () {
-	    function Body() {
-	        this.D = 18;
-	        this.legs = [];
-	        this.L = 60;
-	        this.d = 0;
+	    function Body(boneLength, jointCount) {
+	        this._jointCount = 60;
+	        this.moved = 0;
+	        this._boneLength = boneLength;
+	        this._jointCount = jointCount;
 	    }
+	    Object.defineProperty(Body.prototype, "jointCount", {
+	        get: function () {
+	            return this._jointCount;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Body.prototype, "boneLength", {
+	        get: function () {
+	            return this._boneLength;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(Body.prototype, "bone", {
+	        get: function () {
+	            return this._bone;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Body.prototype.setHead = function (pos) {
 	        var _this = this;
 	        var np = PosStack.fromPos(pos);
 	        if (this.posStack) {
 	            if (np.distance(this.posStack) > 0) {
-	                this.d += np.distance(this.posStack);
+	                this.moved += np.distance(this.posStack);
 	                np.next = this.posStack;
 	                this.posStack = np;
 	            }
@@ -434,13 +474,13 @@
 	        else {
 	            this.posStack = np;
 	        }
-	        this.bone = [];
+	        this._bone = [];
 	        var pp = this.posStack;
 	        var tp = this.posStack;
 	        var body = [];
 	        var _loop_1 = function (i) {
 	            var ad = 0;
-	            var nd = this_1.D;
+	            var nd = this_1._boneLength;
 	            pp.forEach(function (p, id) {
 	                if (id == 0)
 	                    return true;
@@ -448,28 +488,30 @@
 	                var dy = p.y - tp.y;
 	                var d = Math.sqrt(dx * dx + dy * dy);
 	                ad += d;
-	                if (ad > _this.D) {
+	                if (ad > _this._boneLength) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
-	                    _this.bone.push(tp.clone());
+	                    _this._bone.push(tp.clone());
 	                    body.push(tp.clone());
-	                    nd = _this.D;
+	                    nd = _this._boneLength;
 	                    return false;
 	                }
 	                else {
 	                    pp = tp = p;
-	                    nd = _this.D - ad;
+	                    nd = _this._boneLength - ad;
 	                }
 	                return true;
 	            });
 	        };
 	        var this_1 = this;
-	        for (var i = 0; i < this.L; i++) {
+	        for (var i = 0; i < this._jointCount; i++) {
 	            _loop_1(i);
 	        }
 	        if (pp.next && pp.next.next) {
 	            pp.next.next = null;
 	        }
-	        this.legs.forEach(function (l) { return l.setMoveDistance(_this.d); });
+	        this.move(this.moved);
+	    };
+	    Body.prototype.move = function (move) {
 	    };
 	    return Body;
 	}());
@@ -477,8 +519,6 @@
 	var Leg = /** @class */ (function () {
 	    function Leg(body) {
 	        this.step = 0;
-	        this.sid2 = 0;
-	        this.c = 0xff5500;
 	        this.nowPos = new pos_1.default(0, 0);
 	        this.nextPos = new pos_1.default(0, 0);
 	        this.prevPos = new pos_1.default(0, 0);
@@ -519,7 +559,7 @@
 	        var diffStep = Math.abs(this.step - step);
 	        if (diffStep > 0) {
 	            this.step = step;
-	            var nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
+	            var nextId = Math.floor(stepRate / this.body.jointCount) + this.targetRootIndex;
 	            var nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
 	            if (diffStep == 1) {
 	                this.nextPos.copyTo(this.prevPos);
@@ -527,7 +567,7 @@
 	            }
 	            else if (diffStep > 1) {
 	                this.nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
-	                var prevId = nextId + Math.floor(this.stepDistance / this.body.D);
+	                var prevId = nextId + Math.floor(this.stepDistance / this.body.jointCount);
 	                this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
 	            }
 	        }
@@ -543,9 +583,8 @@
 	        this._endMovePos.y = this.nextPos.y;
 	        var rootPos = this.body.bone[this.rootIndex];
 	        var fromPos = this.getRootPos(this.rootIndex);
-	        if (fromPos && rootPos) {
+	        if (fromPos && rootPos)
 	            this.calcLeg(fromPos, this.nowPos);
-	        }
 	    };
 	    Leg.prototype.getRootPos = function (baseId) {
 	        var basePos = this.body.bone[baseId];
@@ -588,7 +627,7 @@
 	    });
 	    Leg.prototype.getTargetPos = function (id, d, length) {
 	        var bp = this.body.bone[id];
-	        var fp = this.body.bone[id];
+	        var fp = bp;
 	        var tp = this.body.bone[id - 1];
 	        if (!tp) {
 	            tp = fp;
@@ -648,6 +687,23 @@
 	var ShapeDrawer = /** @class */ (function () {
 	    function ShapeDrawer() {
 	    }
+	    ShapeDrawer.drawMuscleLine = function (graphics, kelps, color, resolution) {
+	        for (var i = 0; i < kelps.length - 1; i++) {
+	            var fk = kelps[i];
+	            var tk = kelps[i + 1];
+	            this._drawLine2(graphics, fk, tk, color, resolution);
+	        }
+	    };
+	    ShapeDrawer._drawLine2 = function (graphics, fromKelp, toKelp, color, resolution) {
+	        var dx = toKelp.pos.x - fromKelp.pos.x;
+	        var dy = toKelp.pos.y - fromKelp.pos.y;
+	        var d = Math.sqrt(dx * dx + dy * dy);
+	        var vx = dx / d;
+	        var vy = dy / d;
+	        graphics.lineStyle(10, 0);
+	        graphics.moveTo(fromKelp.pos.x, fromKelp.pos.y);
+	        graphics.lineTo(toKelp.pos.x, toKelp.pos.y);
+	    };
 	    ShapeDrawer.drawLine = function (graphics, fromPos, toPos, fromThickness, toThickness, color, boneLength, style) {
 	        if (style === void 0) { style = ShapeDrawer.lineStyle.normal; }
 	        var dx = toPos.x - fromPos.x;

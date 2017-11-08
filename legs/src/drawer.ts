@@ -1,4 +1,9 @@
 import Pos from './pos';
+export interface Kelp {
+    pos: Pos,
+    radius: number,
+    ratio: number
+}
 export default class ShapeDrawer {
     public static lineStyle = {
         normal: (n: number) => n,
@@ -6,6 +11,40 @@ export default class ShapeDrawer {
         sineHalfB: (n: number) => Math.sin(n * Math.PI / 2),
         sineHalfA: (n: number) => Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1
     }
+    public static drawMuscleLine(
+        graphics: PIXI.Graphics,
+        kelps: Kelp[],
+        color: number,
+        resolution: number
+    ) {
+        for(let i = 0; i < kelps.length - 1; i ++) {
+            const fk = kelps[i];
+            const tk = kelps[i + 1];
+            this._drawLine2(
+                graphics, 
+                fk, tk, 
+                color, 
+                resolution
+            );
+        }
+    }
+    private static _drawLine2(
+        graphics: PIXI.Graphics,
+        fromKelp: Kelp,
+        toKelp: Kelp,
+        color: number,
+        resolution: number
+    ) {
+        const dx = toKelp.pos.x - fromKelp.pos.x;
+        const dy = toKelp.pos.y - fromKelp.pos.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        const vx = dx / d;
+        const vy = dy / d;
+        graphics.lineStyle(10, 0);
+        graphics.moveTo(fromKelp.pos.x, fromKelp.pos.y);
+        graphics.lineTo(toKelp.pos.x, toKelp.pos.y);
+    }
+
     public static drawLine(
         graphics: PIXI.Graphics,
         fromPos: Pos,

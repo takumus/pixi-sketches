@@ -15,50 +15,60 @@ class PosStack extends Pos {
     }
 }
 export class Body {
-    public D = 18;
-    public bone: Pos[];
-    public legs: Leg[] = [];
+    private _boneLength: number;
+    private _bone: Pos[];
     private posStack: PosStack;
-    private L = 60;
-    private d: number = 0;
-    constructor() {
+    private _jointCount = 60;
+    private moved: number = 0;
+    constructor(boneLength: number, jointCount: number) {
+        this._boneLength = boneLength;
+        this._jointCount = jointCount;
+    }
+    public get jointCount() {
+        return this._jointCount;
+    }
+    public get boneLength() {
+        return this._boneLength;
+    }
+    public get bone() {
+        return this._bone;
     }
     public setHead(pos: Pos) {
         const np = PosStack.fromPos(pos);
         if (this.posStack) {
             if (np.distance(this.posStack) > 0) {
-                this.d += np.distance(this.posStack);
+                this.moved += np.distance(this.posStack);
                 np.next = this.posStack;
                 this.posStack = np;
             }
         }else {
             this.posStack = np;
         }
-        this.bone = [];
+        this._bone = [];
         let pp: PosStack = this.posStack;
         let tp: Pos = this.posStack;
         const body: Pos[] = [];
-        for (let i = 0; i < this.L; i ++) {
+        for (let i = 0; i < this._jointCount; i ++) {
             let ad = 0;
-            let nd = this.D;
+            let nd = this._boneLength;
             pp.forEach((p, id) => {
                 if (id == 0) return true;
                 const dx = p.x - tp.x;
                 const dy = p.y - tp.y;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 ad += d;
-                if (ad > this.D) {
+                if (ad > this._boneLength) {
                     tp = new PosStack(
                         tp.x + dx / d * nd,
                         tp.y + dy / d * nd
                     );
-                    this.bone.push(tp.clone());
+                    this._bone.push(tp.clone());
                     body.push(tp.clone());
-                    nd = this.D;
+                    nd = this._boneLength;
                     return false;
                 }else {
                     pp = tp = p;
-                    nd = this.D - ad;
+                    nd = this._boneLength - ad;
                 }
                 return true;
             });
@@ -66,17 +76,17 @@ export class Body {
         if (pp.next && pp.next.next) {
             pp.next.next = null;
         }
-        this.legs.forEach((l) => l.setMoveDistance(this.d));
+        this.move(this.moved);
+    }
+    public move(move: number) {
     }
 }
 export class Leg{
     private stepDistance: number;
     private stepDistanceHalf: number;
     private step: number = 0;
-    private sid2: number = 0;
     private targetDistance: number;
     private body: Body;
-    private c: number = 0xff5500;
     private targetRootIndex: number;
     private rootIndex: number;
     private nextPos: Pos;
@@ -130,14 +140,14 @@ export class Leg{
         const diffStep = Math.abs(this.step - step);
         if (diffStep > 0) {
             this.step = step;
-            const nextId = Math.floor(stepRate / this.body.D) + this.targetRootIndex;
+            const nextId = Math.floor(stepRate / this.body.jointCount) + this.targetRootIndex;
             const nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
             if (diffStep == 1) {
                 this.nextPos.copyTo(this.prevPos);
                 nextPos.copyTo(this.nextPos);
             }else if (diffStep > 1) {
                 this.nextPos = this.getTargetPos(nextId, this.directionLR, this.endPointDistanceFromBody);
-                const prevId = nextId + Math.floor(this.stepDistance / this.body.D);
+                const prevId = nextId + Math.floor(this.stepDistance / this.body.jointCount);
                 this.prevPos = this.getTargetPos(prevId, this.directionLR, this.endPointDistanceFromBody);
             }
         }
@@ -155,9 +165,8 @@ export class Leg{
 
         const rootPos = this.body.bone[this.rootIndex];
         const fromPos = this.getRootPos(this.rootIndex);
-        if (fromPos && rootPos) {
-            this.calcLeg(fromPos, this.nowPos);
-        }
+
+        if (fromPos && rootPos) this.calcLeg(fromPos, this.nowPos);
     }
     private getRootPos(baseId: number) {
         const basePos = this.body.bone[baseId];
@@ -190,7 +199,7 @@ export class Leg{
     }
     private getTargetPos(id: number, d: number, length: number): Pos {
         let bp = this.body.bone[id];
-        let fp: Pos = this.body.bone[id];
+        let fp: Pos = bp;
         let tp: Pos = this.body.bone[id - 1];
         if (!tp) {
             tp = fp;
