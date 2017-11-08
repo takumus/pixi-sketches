@@ -201,10 +201,10 @@ class MyBody extends Body {
         const d = 15;
         this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "left",  10, 50, 0 + d * 2,  60, 50));
         this.legs.push(new MyLeg(this, 120, offset,      offset + 8,  "front", "right", 10, 50, 60 + d * 2, 60, 50));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "left",  20, 60, 60 + d * 1, 70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 20, 60, 0 + d * 1,  70, 80));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  10, 40, 0,          80, 90));
-        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 10, 40, 60,         80, 90));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "left",  20, 70, 60 + d * 1, 70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 12, offset + 12, "back",  "right", 20, 70, 0 + d * 1,  70, 80));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "left",  10, 60, 0,          80, 90));
+        this.legs.push(new MyLeg(this, 120, offset + 17, offset + 17, "back",  "right", 10, 60, 60,         80, 90));
     }
     public setOffset(o: number) {
         this.legs[0].setStepOffset(0 + o * 2);
