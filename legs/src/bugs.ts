@@ -15,7 +15,6 @@ class PosStack extends Pos {
     }
 }
 export class Body {
-    public canvas: PIXI.Graphics;
     public D = 18;
     public bone: Pos[];
     public legs: Leg[] = [];
@@ -23,7 +22,6 @@ export class Body {
     private L = 60;
     private d: number = 0;
     constructor() {
-        this.canvas = new PIXI.Graphics();
     }
     public setHead(pos: Pos) {
         const np = PosStack.fromPos(pos);
@@ -37,17 +35,6 @@ export class Body {
             this.posStack = np;
         }
         this.bone = [];
-        this.canvas.clear();
-        this.canvas.lineStyle(1, 0x666666);
-        this.posStack.forEach((p, id) => {
-            if (id == 0) {
-                this.canvas.moveTo(p.x, p.y);
-            }else {
-                this.canvas.lineTo(p.x, p.y);
-            }
-            return true;
-        });
-        this.canvas.lineStyle();
         let pp: PosStack = this.posStack;
         let tp: Pos = this.posStack;
         const body: Pos[] = [];
@@ -65,11 +52,8 @@ export class Body {
                         tp.x + dx / d * nd,
                         tp.y + dy / d * nd
                     );
-                    this.canvas.beginFill(0x000000);
-                    this.canvas.drawCircle(tp.x, tp.y, 1.5);
                     this.bone.push(tp.clone());
                     body.push(tp.clone());
-                    this.canvas.endFill();
                     nd = this.D;
                     return false;
                 }else {

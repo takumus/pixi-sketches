@@ -53,7 +53,7 @@
 	var stageWidth = 0, stageHeight = 0;
 	var main = new main_1.default();
 	var init = function () {
-	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: 1, transparent: true });
+	    renderer = PIXI.autoDetectRenderer(800, 800, { antialias: true, resolution: window.devicePixelRatio, transparent: true });
 	    canvas = document.getElementById("content");
 	    canvas.appendChild(renderer.view);
 	    renderer.view.style.width = "100%";
@@ -420,7 +420,6 @@
 	        this.legs = [];
 	        this.L = 60;
 	        this.d = 0;
-	        this.canvas = new PIXI.Graphics();
 	    }
 	    Body.prototype.setHead = function (pos) {
 	        var _this = this;
@@ -436,18 +435,6 @@
 	            this.posStack = np;
 	        }
 	        this.bone = [];
-	        this.canvas.clear();
-	        this.canvas.lineStyle(1, 0x666666);
-	        this.posStack.forEach(function (p, id) {
-	            if (id == 0) {
-	                _this.canvas.moveTo(p.x, p.y);
-	            }
-	            else {
-	                _this.canvas.lineTo(p.x, p.y);
-	            }
-	            return true;
-	        });
-	        this.canvas.lineStyle();
 	        var pp = this.posStack;
 	        var tp = this.posStack;
 	        var body = [];
@@ -463,11 +450,8 @@
 	                ad += d;
 	                if (ad > _this.D) {
 	                    tp = new PosStack(tp.x + dx / d * nd, tp.y + dy / d * nd);
-	                    _this.canvas.beginFill(0x000000);
-	                    _this.canvas.drawCircle(tp.x, tp.y, 1.5);
 	                    _this.bone.push(tp.clone());
 	                    body.push(tp.clone());
-	                    _this.canvas.endFill();
 	                    nd = _this.D;
 	                    return false;
 	                }
