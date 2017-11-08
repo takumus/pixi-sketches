@@ -154,31 +154,104 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.drawCircle(p.x, p.y, 2);
             this.canvas.endFill();
         });
-        this.body.legs.forEach((leg: MyLeg) => {
-            this.canvas.lineStyle();
+        this.canvas.lineStyle();
+        for (let i = 0; i < this.body.legs.length; i += 2) {
+            const l1 = this.body.legs[i];
+            const l2 = this.body.legs[i + 1];
             ShapeDrawer.drawMuscleLine(
                 this.canvas,
                 [
                     {
-                        pos: leg.rootPos,
+                        pos: l1.rootPos,
+                        radius: 21,
+                        ratio: 1
+                    },
+                    {
+                        pos: l1.middlePos,
+                        radius: 11,
+                        ratio: 1
+                    },
+                    {
+                        pos: l1.endPos,
+                        radius: 6,
+                        ratio: 1
+                    }
+                ],
+                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                0x666666,
+                5
+            );
+            ShapeDrawer.drawMuscleLine(
+                this.canvas,
+                [
+                    {
+                        pos: l2.rootPos,
+                        radius: 21,
+                        ratio: 1
+                    },
+                    {
+                        pos: l2.middlePos,
+                        radius: 11,
+                        ratio: 1
+                    },
+                    {
+                        pos: l2.endPos,
+                        radius: 6,
+                        ratio: 1
+                    }
+                ],
+                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                0x666666,
+                5
+            );
+            ShapeDrawer.drawMuscleLine(
+                this.canvas,
+                [
+                    {
+                        pos: l1.rootPos,
                         radius: 20,
                         ratio: 1
                     },
                     {
-                        pos: leg.middlePos,
+                        pos: l1.middlePos,
                         radius: 10,
                         ratio: 1
                     },
                     {
-                        pos: leg.endPos,
+                        pos: l1.endPos,
                         radius: 5,
                         ratio: 1
                     }
                 ],
-                [ShapeDrawer.lineStyle.sin, ShapeDrawer.lineStyle.sin],
-                0x666666,
-                10
+                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                0xffffff,
+                5
             );
+            ShapeDrawer.drawMuscleLine(
+                this.canvas,
+                [
+                    {
+                        pos: l2.rootPos,
+                        radius: 20,
+                        ratio: 1
+                    },
+                    {
+                        pos: l2.middlePos,
+                        radius: 10,
+                        ratio: 1
+                    },
+                    {
+                        pos: l2.endPos,
+                        radius: 5,
+                        ratio: 1
+                    }
+                ],
+                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                0xffffff,
+                5
+            );
+        }
+        this.body.legs.forEach((leg: MyLeg) => {
             ///*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;
             this.canvas.lineStyle(1, 0x0000ff, a);

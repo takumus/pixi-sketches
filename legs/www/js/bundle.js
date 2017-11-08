@@ -276,25 +276,80 @@
 	            _this.canvas.drawCircle(p.x, p.y, 2);
 	            _this.canvas.endFill();
 	        });
-	        this.body.legs.forEach(function (leg) {
-	            _this.canvas.lineStyle();
-	            drawer_1.ShapeDrawer.drawMuscleLine(_this.canvas, [
+	        this.canvas.lineStyle();
+	        for (var i = 0; i < this.body.legs.length; i += 2) {
+	            var l1 = this.body.legs[i];
+	            var l2 = this.body.legs[i + 1];
+	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
 	                {
-	                    pos: leg.rootPos,
+	                    pos: l1.rootPos,
+	                    radius: 21,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l1.middlePos,
+	                    radius: 11,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l1.endPos,
+	                    radius: 6,
+	                    ratio: 1
+	                }
+	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 5);
+	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	                {
+	                    pos: l2.rootPos,
+	                    radius: 21,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l2.middlePos,
+	                    radius: 11,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l2.endPos,
+	                    radius: 6,
+	                    ratio: 1
+	                }
+	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 5);
+	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	                {
+	                    pos: l1.rootPos,
 	                    radius: 20,
 	                    ratio: 1
 	                },
 	                {
-	                    pos: leg.middlePos,
+	                    pos: l1.middlePos,
 	                    radius: 10,
 	                    ratio: 1
 	                },
 	                {
-	                    pos: leg.endPos,
+	                    pos: l1.endPos,
 	                    radius: 5,
 	                    ratio: 1
 	                }
-	            ], [drawer_1.ShapeDrawer.lineStyle.sin, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 10);
+	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0xffffff, 5);
+	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	                {
+	                    pos: l2.rootPos,
+	                    radius: 20,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l2.middlePos,
+	                    radius: 10,
+	                    ratio: 1
+	                },
+	                {
+	                    pos: l2.endPos,
+	                    radius: 5,
+	                    ratio: 1
+	                }
+	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0xffffff, 5);
+	        }
+	        this.body.legs.forEach(function (leg) {
 	            ///*
 	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
 	            _this.canvas.lineStyle(1, 0x0000ff, a);
