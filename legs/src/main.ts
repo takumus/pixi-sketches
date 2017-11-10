@@ -141,117 +141,32 @@ class MyBodyRenderer extends PIXI.Container {
     public setHead(o: Pos) {
         this.body.setHead(o);
         this.canvas.clear();
-        this.canvas.lineStyle(1, 0xCCCCCC);
-        this.body.bone.forEach((p, id) => {
-            if (id == 0) {
-                this.canvas.moveTo(p.x, p.y);
-            }else {
-                this.canvas.lineTo(p.x, p.y);
-            }
-        });
-        this.body.bone.forEach((p, id) => {
-            this.canvas.beginFill(0x666666);
-            this.canvas.drawCircle(p.x, p.y, 2);
-            this.canvas.endFill();
-        });
+        const kelps = [];
         this.canvas.lineStyle();
-        for (let i = 0; i < this.body.legs.length; i += 2) {
-            const l1 = this.body.legs[i];
-            const l2 = this.body.legs[i + 1];
+        this.body.legs.forEach((leg: MyLeg, id) => {
             Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
                     {
-                        pos: l1.rootPos,
-                        radius: 21,
+                        pos: leg.rootPos,
+                        radius: 25,
                         ratio: 1
                     },
                     {
-                        pos: l1.middlePos,
-                        radius: 11,
-                        ratio: 1
-                    },
-                    {
-                        pos: l1.endPos,
-                        radius: 6,
-                        ratio: 1
-                    }
-                ],
-                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
-                0x666666,
-                5
-            );
-            Drawer.line.drawMuscleLine(
-                this.canvas,
-                [
-                    {
-                        pos: l2.rootPos,
-                        radius: 21,
-                        ratio: 1
-                    },
-                    {
-                        pos: l2.middlePos,
-                        radius: 11,
-                        ratio: 1
-                    },
-                    {
-                        pos: l2.endPos,
-                        radius: 6,
-                        ratio: 1
-                    }
-                ],
-                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
-                0x666666,
-                5
-            );
-            Drawer.line.drawMuscleLine(
-                this.canvas,
-                [
-                    {
-                        pos: l1.rootPos,
-                        radius: 20,
-                        ratio: 1
-                    },
-                    {
-                        pos: l1.middlePos,
+                        pos: leg.middlePos,
                         radius: 10,
                         ratio: 1
                     },
                     {
-                        pos: l1.endPos,
-                        radius: 5,
+                        pos: leg.endPos,
+                        radius: 2,
                         ratio: 1
                     }
                 ],
-                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
-                0xffffff,
+                [Drawer.line.styles.sin, Drawer.line.styles.sin],
+                0x999999+(0x111111 * Math.floor(id / 2)),
                 5
             );
-            Drawer.line.drawMuscleLine(
-                this.canvas,
-                [
-                    {
-                        pos: l2.rootPos,
-                        radius: 20,
-                        ratio: 1
-                    },
-                    {
-                        pos: l2.middlePos,
-                        radius: 10,
-                        ratio: 1
-                    },
-                    {
-                        pos: l2.endPos,
-                        radius: 5,
-                        ratio: 1
-                    }
-                ],
-                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
-                0xffffff,
-                5
-            );
-        }
-        this.body.legs.forEach((leg: MyLeg) => {
             ///*
             const a = (1 - leg.moveProgress) * 0.6 + 0.4;
             this.canvas.lineStyle(1, 0x0000ff, a);
@@ -259,8 +174,25 @@ class MyBodyRenderer extends PIXI.Container {
             this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
             this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
             this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+            this.canvas.lineStyle();
             //*/
-        })
+        });
+        this.body.bone.forEach((p, id) => {
+            if (id % 2 > 0) return;
+            const r = (this.body.bone.length - id) / this.body.bone.length;
+            kelps.push({
+                pos: p,
+                radius: r * 30 * (id % 4 == 0 ? 0.5 : 1),
+                ratio: 1
+            })
+        });
+        Drawer.line.drawMuscleLine(
+            this.canvas,
+            kelps,
+            Drawer.line.styles.sin,
+            0x666666,
+            5
+        );
     }
     public setOffset(o: number) {
         this.body.setOffset(o);

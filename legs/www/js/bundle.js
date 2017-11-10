@@ -262,94 +262,26 @@
 	        var _this = this;
 	        this.body.setHead(o);
 	        this.canvas.clear();
-	        this.canvas.lineStyle(1, 0xCCCCCC);
-	        this.body.bone.forEach(function (p, id) {
-	            if (id == 0) {
-	                _this.canvas.moveTo(p.x, p.y);
-	            }
-	            else {
-	                _this.canvas.lineTo(p.x, p.y);
-	            }
-	        });
-	        this.body.bone.forEach(function (p, id) {
-	            _this.canvas.beginFill(0x666666);
-	            _this.canvas.drawCircle(p.x, p.y, 2);
-	            _this.canvas.endFill();
-	        });
+	        var kelps = [];
 	        this.canvas.lineStyle();
-	        for (var i = 0; i < this.body.legs.length; i += 2) {
-	            var l1 = this.body.legs[i];
-	            var l2 = this.body.legs[i + 1];
-	            Drawer.line.drawMuscleLine(this.canvas, [
+	        this.body.legs.forEach(function (leg, id) {
+	            Drawer.line.drawMuscleLine(_this.canvas, [
 	                {
-	                    pos: l1.rootPos,
-	                    radius: 21,
+	                    pos: leg.rootPos,
+	                    radius: 25,
 	                    ratio: 1
 	                },
 	                {
-	                    pos: l1.middlePos,
-	                    radius: 11,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l1.endPos,
-	                    radius: 6,
-	                    ratio: 1
-	                }
-	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0x666666, 5);
-	            Drawer.line.drawMuscleLine(this.canvas, [
-	                {
-	                    pos: l2.rootPos,
-	                    radius: 21,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l2.middlePos,
-	                    radius: 11,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l2.endPos,
-	                    radius: 6,
-	                    ratio: 1
-	                }
-	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0x666666, 5);
-	            Drawer.line.drawMuscleLine(this.canvas, [
-	                {
-	                    pos: l1.rootPos,
-	                    radius: 20,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l1.middlePos,
+	                    pos: leg.middlePos,
 	                    radius: 10,
 	                    ratio: 1
 	                },
 	                {
-	                    pos: l1.endPos,
-	                    radius: 5,
+	                    pos: leg.endPos,
+	                    radius: 2,
 	                    ratio: 1
 	                }
-	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0xffffff, 5);
-	            Drawer.line.drawMuscleLine(this.canvas, [
-	                {
-	                    pos: l2.rootPos,
-	                    radius: 20,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l2.middlePos,
-	                    radius: 10,
-	                    ratio: 1
-	                },
-	                {
-	                    pos: l2.endPos,
-	                    radius: 5,
-	                    ratio: 1
-	                }
-	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0xffffff, 5);
-	        }
-	        this.body.legs.forEach(function (leg) {
+	            ], [Drawer.line.styles.sin, Drawer.line.styles.sin], 0x999999 + (0x111111 * Math.floor(id / 2)), 5);
 	            ///*
 	            var a = (1 - leg.moveProgress) * 0.6 + 0.4;
 	            _this.canvas.lineStyle(1, 0x0000ff, a);
@@ -357,8 +289,20 @@
 	            _this.canvas.lineTo(leg.endMovePos.x, leg.endMovePos.y);
 	            _this.canvas.lineStyle(1, leg.moveProgress == 1 ? 0xff0000 : 0x0000ff, leg.moveProgress == 1 ? 1 : a);
 	            _this.canvas.drawRect(leg.endMovePos.x - 5, leg.endMovePos.y - 5, 10, 10);
+	            _this.canvas.lineStyle();
 	            //*/
 	        });
+	        this.body.bone.forEach(function (p, id) {
+	            if (id % 2 > 0)
+	                return;
+	            var r = (_this.body.bone.length - id) / _this.body.bone.length;
+	            kelps.push({
+	                pos: p,
+	                radius: r * 30 * (id % 4 == 0 ? 0.5 : 1),
+	                ratio: 1
+	            });
+	        });
+	        Drawer.line.drawMuscleLine(this.canvas, kelps, Drawer.line.styles.sin, 0x666666, 5);
 	    };
 	    MyBodyRenderer.prototype.setOffset = function (o) {
 	        this.body.setOffset(o);
@@ -742,7 +686,7 @@
 	            var fk = kelps[i];
 	            if (i < kelps.length - 1) {
 	                var tk = kelps[i + 1];
-	                _drawLine(graphics, fk, tk, color, resolution, styles[i]);
+	                _drawLine(graphics, fk, tk, color, resolution, styles[i] || styles);
 	            }
 	            graphics.lineStyle();
 	            graphics.beginFill(color);

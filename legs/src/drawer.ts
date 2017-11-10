@@ -15,7 +15,7 @@ export namespace line {
     export function drawMuscleLine(
         graphics: PIXI.Graphics,
         kelps: Kelp[],
-        styles: Style[],
+        styles: Style[] | Style,
         color: number,
         resolution: number
     ) {
@@ -28,7 +28,7 @@ export namespace line {
                     fk, tk, 
                     color, 
                     resolution,
-                    styles[i]
+                    styles[i] || styles
                 );
             }
             graphics.lineStyle();
