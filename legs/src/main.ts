@@ -1,7 +1,7 @@
 import Canvas from '../.src/canvas';
 import {Body, Leg} from './bugs';
 import Pos from './pos';
-import {ShapeDrawer} from './drawer';
+import * as Drawer from './drawer';
 export default class Main extends Canvas {
     private bodyRenderer: MyBodyRenderer;
     private pp: Pos;
@@ -158,7 +158,7 @@ class MyBodyRenderer extends PIXI.Container {
         for (let i = 0; i < this.body.legs.length; i += 2) {
             const l1 = this.body.legs[i];
             const l2 = this.body.legs[i + 1];
-            ShapeDrawer.drawMuscleLine(
+            Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
                     {
@@ -177,11 +177,11 @@ class MyBodyRenderer extends PIXI.Container {
                         ratio: 1
                     }
                 ],
-                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
                 0x666666,
                 5
             );
-            ShapeDrawer.drawMuscleLine(
+            Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
                     {
@@ -200,11 +200,11 @@ class MyBodyRenderer extends PIXI.Container {
                         ratio: 1
                     }
                 ],
-                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
                 0x666666,
                 5
             );
-            ShapeDrawer.drawMuscleLine(
+            Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
                     {
@@ -223,11 +223,11 @@ class MyBodyRenderer extends PIXI.Container {
                         ratio: 1
                     }
                 ],
-                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
                 0xffffff,
                 5
             );
-            ShapeDrawer.drawMuscleLine(
+            Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
                     {
@@ -246,7 +246,7 @@ class MyBodyRenderer extends PIXI.Container {
                         ratio: 1
                     }
                 ],
-                [ShapeDrawer.lineStyle.sineHalfA, ShapeDrawer.lineStyle.sin],
+                [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin],
                 0xffffff,
                 5
             );

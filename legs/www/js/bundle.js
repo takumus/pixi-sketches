@@ -141,7 +141,7 @@
 	var canvas_1 = __webpack_require__(2);
 	var bugs_1 = __webpack_require__(3);
 	var pos_1 = __webpack_require__(4);
-	var drawer_1 = __webpack_require__(5);
+	var Drawer = __webpack_require__(5);
 	var Main = /** @class */ (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
@@ -280,7 +280,7 @@
 	        for (var i = 0; i < this.body.legs.length; i += 2) {
 	            var l1 = this.body.legs[i];
 	            var l2 = this.body.legs[i + 1];
-	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	            Drawer.line.drawMuscleLine(this.canvas, [
 	                {
 	                    pos: l1.rootPos,
 	                    radius: 21,
@@ -296,8 +296,8 @@
 	                    radius: 6,
 	                    ratio: 1
 	                }
-	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 5);
-	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0x666666, 5);
+	            Drawer.line.drawMuscleLine(this.canvas, [
 	                {
 	                    pos: l2.rootPos,
 	                    radius: 21,
@@ -313,8 +313,8 @@
 	                    radius: 6,
 	                    ratio: 1
 	                }
-	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0x666666, 5);
-	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0x666666, 5);
+	            Drawer.line.drawMuscleLine(this.canvas, [
 	                {
 	                    pos: l1.rootPos,
 	                    radius: 20,
@@ -330,8 +330,8 @@
 	                    radius: 5,
 	                    ratio: 1
 	                }
-	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0xffffff, 5);
-	            drawer_1.ShapeDrawer.drawMuscleLine(this.canvas, [
+	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0xffffff, 5);
+	            Drawer.line.drawMuscleLine(this.canvas, [
 	                {
 	                    pos: l2.rootPos,
 	                    radius: 20,
@@ -347,7 +347,7 @@
 	                    radius: 5,
 	                    ratio: 1
 	                }
-	            ], [drawer_1.ShapeDrawer.lineStyle.sineHalfA, drawer_1.ShapeDrawer.lineStyle.sin], 0xffffff, 5);
+	            ], [Drawer.line.styles.sinHalfA, Drawer.line.styles.sin], 0xffffff, 5);
 	        }
 	        this.body.legs.forEach(function (leg) {
 	            ///*
@@ -728,23 +728,30 @@
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var ShapeDrawer = /** @class */ (function () {
-	    function ShapeDrawer() {
-	    }
-	    ShapeDrawer.drawMuscleLine = function (graphics, kelps, styles, color, resolution) {
+	var line;
+	(function (line) {
+	    var styles;
+	    (function (styles) {
+	        styles.normal = function (n) { return n; };
+	        styles.sin = function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; };
+	        styles.sinHalfB = function (n) { return Math.sin(n * Math.PI / 2); };
+	        styles.sinHalfA = function (n) { return Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1; };
+	    })(styles = line.styles || (line.styles = {}));
+	    function drawMuscleLine(graphics, kelps, styles, color, resolution) {
 	        for (var i = 0; i < kelps.length; i++) {
 	            var fk = kelps[i];
 	            if (i < kelps.length - 1) {
 	                var tk = kelps[i + 1];
-	                this._drawLine2(graphics, fk, tk, color, resolution, styles[i]);
+	                _drawLine(graphics, fk, tk, color, resolution, styles[i]);
 	            }
 	            graphics.lineStyle();
 	            graphics.beginFill(color);
 	            graphics.drawCircle(fk.pos.x, fk.pos.y, fk.radius);
 	            graphics.endFill();
 	        }
-	    };
-	    ShapeDrawer._drawLine2 = function (graphics, fromKelp, toKelp, color, resolution, style) {
+	    }
+	    line.drawMuscleLine = drawMuscleLine;
+	    function _drawLine(graphics, fromKelp, toKelp, color, resolution, style) {
 	        var dx = toKelp.pos.x - fromKelp.pos.x;
 	        var dy = toKelp.pos.y - fromKelp.pos.y;
 	        var d = Math.sqrt(dx * dx + dy * dy);
@@ -776,41 +783,8 @@
 	            var y = fromKelp.pos.y + dy * r + vyB * radius;
 	            graphics.lineTo(x, y);
 	        }
-	    };
-	    ShapeDrawer.drawLine = function (graphics, fromPos, toPos, fromThickness, toThickness, color, boneLength, style) {
-	        if (style === void 0) { style = ShapeDrawer.lineStyle.normal; }
-	        var dx = toPos.x - fromPos.x;
-	        var dy = toPos.y - fromPos.y;
-	        var D = Math.sqrt(dx * dx + dy * dy);
-	        var ii = 1 / boneLength;
-	        for (var i = 0; i < 1; i += ii) {
-	            this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i);
-	        }
-	        this._drawLine(graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, 1);
-	        graphics.lineStyle();
-	        graphics.beginFill(color);
-	        graphics.drawCircle(fromPos.x, fromPos.y, fromThickness / 2);
-	        graphics.drawCircle(toPos.x, toPos.y, toThickness / 2);
-	    };
-	    ShapeDrawer._drawLine = function (graphics, fromPos, dx, dy, fromThickness, toThickness, color, style, i) {
-	        var dt = toThickness - fromThickness;
-	        graphics.lineStyle(fromThickness + dt * style(i), color);
-	        if (i == 0) {
-	            graphics.moveTo(fromPos.x, fromPos.y);
-	        }
-	        else {
-	            graphics.lineTo(fromPos.x + dx * i, fromPos.y + dy * i);
-	        }
-	    };
-	    ShapeDrawer.lineStyle = {
-	        normal: function (n) { return n; },
-	        sin: function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; },
-	        sineHalfB: function (n) { return Math.sin(n * Math.PI / 2); },
-	        sineHalfA: function (n) { return Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1; }
-	    };
-	    return ShapeDrawer;
-	}());
-	exports.ShapeDrawer = ShapeDrawer;
+	    }
+	})(line = exports.line || (exports.line = {}));
 
 
 /***/ })
