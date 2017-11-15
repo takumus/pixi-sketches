@@ -92,7 +92,7 @@ class MyLeg extends Leg {
     public setDirectionFB(value: string) {
         this.directionFB = Math.floor(value=="front"?1:-1);
     }
-    protected calcLeg(fromPos: Pos, targetPos: Pos) {
+    public calcLeg(fromPos: Pos, targetPos: Pos) {
         const poses = this.getLegPos(
             fromPos,
             targetPos,
@@ -144,6 +144,7 @@ class MyBodyRenderer extends PIXI.Container {
         const kelps = [];
         this.canvas.lineStyle();
         this.body.legs.forEach((leg: MyLeg, id) => {
+            const tr = (1 - (Math.cos(leg.moveProgress * Math.PI * 2) + 1) / 2) * 0.6 + 1;
             Drawer.line.drawMuscleLine(
                 this.canvas,
                 [
@@ -154,12 +155,12 @@ class MyBodyRenderer extends PIXI.Container {
                     },
                     {
                         pos: leg.middlePos,
-                        radius: 10,
+                        radius: 10 * tr,
                         ratio: 1
                     },
                     {
                         pos: leg.endPos,
-                        radius: 2,
+                        radius: 4 * tr * 0.6,
                         ratio: 1
                     }
                 ],
@@ -178,11 +179,11 @@ class MyBodyRenderer extends PIXI.Container {
             //*/
         });
         this.body.bone.forEach((p, id) => {
-            if (id % 2 > 0) return;
+            if (id % 3 > 0) return;
             const r = (this.body.bone.length - id) / this.body.bone.length;
             kelps.push({
                 pos: p,
-                radius: r * 30 * (id % 4 == 0 ? 0.5 : 1),
+                radius: r * 30 * (id % 6 == 0 ? 0.5 : 1),
                 ratio: 1
             })
         });

@@ -265,6 +265,7 @@
 	        var kelps = [];
 	        this.canvas.lineStyle();
 	        this.body.legs.forEach(function (leg, id) {
+	            var tr = (1 - (Math.cos(leg.moveProgress * Math.PI * 2) + 1) / 2) * 0.6 + 1;
 	            Drawer.line.drawMuscleLine(_this.canvas, [
 	                {
 	                    pos: leg.rootPos,
@@ -273,12 +274,12 @@
 	                },
 	                {
 	                    pos: leg.middlePos,
-	                    radius: 10,
+	                    radius: 10 * tr,
 	                    ratio: 1
 	                },
 	                {
 	                    pos: leg.endPos,
-	                    radius: 2,
+	                    radius: 4 * tr * 0.6,
 	                    ratio: 1
 	                }
 	            ], [Drawer.line.styles.sin, Drawer.line.styles.sin], 0x999999 + (0x111111 * Math.floor(id / 2)), 5);
@@ -293,12 +294,12 @@
 	            //*/
 	        });
 	        this.body.bone.forEach(function (p, id) {
-	            if (id % 2 > 0)
+	            if (id % 3 > 0)
 	                return;
 	            var r = (_this.body.bone.length - id) / _this.body.bone.length;
 	            kelps.push({
 	                pos: p,
-	                radius: r * 30 * (id % 4 == 0 ? 0.5 : 1),
+	                radius: r * 30 * (id % 6 == 0 ? 0.5 : 1),
 	                ratio: 1
 	            });
 	        });

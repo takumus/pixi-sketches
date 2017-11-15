@@ -187,7 +187,7 @@ export class Leg{
             basePos.y + this.directionLR * dx * this.rootPointDistanceFromBody
         )
     }
-    protected calcLeg(fromPos: Pos, targetPos: Pos): void {}
+    public calcLeg(fromPos: Pos, targetPos: Pos): void {}
     public get moveProgress() {
         return this._moveProgress;
     }
