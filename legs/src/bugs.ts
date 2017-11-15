@@ -81,6 +81,13 @@ export class Body {
     public move(move: number) {
     }
 }
+export type LegMoveStyle = (n: number) => number;
+export namespace legMoveStyles {
+    export const normal: LegMoveStyle = (n: number) => n;
+    export const sin: LegMoveStyle = (n: number) => (Math.cos(n * Math.PI + Math.PI) + 1) / 2;
+    export const sinHalfB: LegMoveStyle = (n: number) => Math.sin(n * Math.PI / 2);
+    export const sinHalfA: LegMoveStyle = (n: number) => Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1;
+}
 export class Leg{
     private stepDistance: number;
     private stepDistanceHalf: number;
@@ -99,6 +106,7 @@ export class Leg{
     private _beginMovePos: Pos;
     private _endMovePos: Pos;
     private _moveProgress: number;
+    private _moveStyle: LegMoveStyle;
     constructor(body: Body) {
         this.nowPos = new Pos(0, 0);
         this.nextPos = new Pos(0, 0);
@@ -106,6 +114,10 @@ export class Leg{
         this._beginMovePos = new Pos(0, 0);
         this._endMovePos = new Pos(0, 0);
         this.setBody(body);
+        this.setMoveStyle(legMoveStyles.sin);
+    }
+    public setMoveStyle(style: LegMoveStyle): void {
+        this._moveStyle = style;
     }
     public setEndPointDistanceFromBody(value: number): void {
         this.endPointDistanceFromBody = value;
@@ -152,8 +164,7 @@ export class Leg{
             }
         }
         const br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
-        let r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-        r = Math.pow(r, 1.5);
+        let r = this._moveStyle(br);
         this._moveProgress = r;
         this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
         this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;

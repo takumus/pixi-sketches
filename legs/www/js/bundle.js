@@ -139,7 +139,7 @@
 	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var canvas_1 = __webpack_require__(2);
-	var bugs_1 = __webpack_require__(3);
+	var Bugs = __webpack_require__(3);
 	var pos_1 = __webpack_require__(4);
 	var Drawer = __webpack_require__(5);
 	var Main = /** @class */ (function (_super) {
@@ -152,7 +152,7 @@
 	        this.bodyRenderer.scale.set(0.8, 0.8);
 	        this.addChild(this.bodyRenderer);
 	        var props = {
-	            auto: true,
+	            auto: false,
 	            offset: 30
 	        };
 	        var d = new dat.GUI();
@@ -203,6 +203,7 @@
 	        _this.setRootIndex(rootIndex);
 	        _this.setL1L(l1l);
 	        _this.setL2L(l2l);
+	        _this.setMoveStyle(function (n) { return Math.pow(Bugs.legMoveStyles.sin(n), 1.7); });
 	        _this.rootPos = new pos_1.default(0, 0);
 	        _this.middlePos = new pos_1.default(0, 0);
 	        _this.endPos = new pos_1.default(0, 0);
@@ -248,7 +249,7 @@
 	        };
 	    };
 	    return MyLeg;
-	}(bugs_1.Leg));
+	}(Bugs.Leg));
 	var MyBodyRenderer = /** @class */ (function (_super) {
 	    __extends(MyBodyRenderer, _super);
 	    function MyBodyRenderer() {
@@ -337,7 +338,7 @@
 	        this.legs.forEach(function (l) { return l.setMoveDistance(moved); });
 	    };
 	    return MyBody;
-	}(bugs_1.Body));
+	}(Bugs.Body));
 
 
 /***/ }),
@@ -505,6 +506,13 @@
 	    return Body;
 	}());
 	exports.Body = Body;
+	var legMoveStyles;
+	(function (legMoveStyles) {
+	    legMoveStyles.normal = function (n) { return n; };
+	    legMoveStyles.sin = function (n) { return (Math.cos(n * Math.PI + Math.PI) + 1) / 2; };
+	    legMoveStyles.sinHalfB = function (n) { return Math.sin(n * Math.PI / 2); };
+	    legMoveStyles.sinHalfA = function (n) { return Math.sin(n * Math.PI / 2 - Math.PI / 2) + 1; };
+	})(legMoveStyles = exports.legMoveStyles || (exports.legMoveStyles = {}));
 	var Leg = /** @class */ (function () {
 	    function Leg(body) {
 	        this.step = 0;
@@ -514,7 +522,11 @@
 	        this._beginMovePos = new pos_1.default(0, 0);
 	        this._endMovePos = new pos_1.default(0, 0);
 	        this.setBody(body);
+	        this.setMoveStyle(legMoveStyles.sin);
 	    }
+	    Leg.prototype.setMoveStyle = function (style) {
+	        this._moveStyle = style;
+	    };
 	    Leg.prototype.setEndPointDistanceFromBody = function (value) {
 	        this.endPointDistanceFromBody = value;
 	    };
@@ -561,8 +573,7 @@
 	            }
 	        }
 	        var br = (stepRate > this.stepDistanceHalf) ? 1 : halfStepRate / this.stepDistanceHalf;
-	        var r = (Math.cos(Math.PI + Math.PI * br) + 1) / 2;
-	        r = Math.pow(r, 1.5);
+	        var r = this._moveStyle(br);
 	        this._moveProgress = r;
 	        this.nowPos.x = (this.nextPos.x - this.prevPos.x) * r + this.prevPos.x;
 	        this.nowPos.y = (this.nextPos.y - this.prevPos.y) * r + this.prevPos.y;

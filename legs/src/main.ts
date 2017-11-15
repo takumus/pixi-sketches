@@ -1,5 +1,5 @@
 import Canvas from '../.src/canvas';
-import {Body, Leg} from './bugs';
+import * as Bugs from './bugs';
 import Pos from './pos';
 import * as Drawer from './drawer';
 export default class Main extends Canvas {
@@ -13,7 +13,7 @@ export default class Main extends Canvas {
         this.addChild(this.bodyRenderer);
 
         const props = {
-            auto: true,
+            auto: false,
             offset: 30
         }        
         const d = new dat.GUI();
@@ -48,7 +48,7 @@ export default class Main extends Canvas {
     }
     public resize(width: number, height: number) {}
 }
-class MyLeg extends Leg {
+class MyLeg extends Bugs.Leg {
     private directionFB: number;
     private l1l: number;
     private l2l: number;
@@ -56,7 +56,7 @@ class MyLeg extends Leg {
     public middlePos: Pos;
     public endPos: Pos;
     constructor(
-        body: Body, 
+        body: Bugs.Body, 
         stepDistance: number, 
         targetRootIndex: number, 
         rootIndex: number, 
@@ -79,6 +79,7 @@ class MyLeg extends Leg {
         this.setRootIndex(rootIndex);
         this.setL1L(l1l);
         this.setL2L(l2l);
+        this.setMoveStyle((n) => Math.pow(Bugs.legMoveStyles.sin(n), 1.7));
         this.rootPos = new Pos(0, 0);
         this.middlePos = new Pos(0, 0);
         this.endPos = new Pos(0, 0);
@@ -199,7 +200,7 @@ class MyBodyRenderer extends PIXI.Container {
         this.body.setOffset(o);
     }
 }
-class MyBody extends Body {
+class MyBody extends Bugs.Body {
     public legs: MyLeg[] = [];
     constructor() {
         super(18, 60);
