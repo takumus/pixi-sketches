@@ -141,7 +141,6 @@
 	    }
 	    Main.prototype.init = function () {
 	        var _this = this;
-	        this.line = [];
 	        this.pos = [];
 	        this.pos.push(new Point(30, 600));
 	        this.pos.push(new Point(60, 150));
@@ -162,50 +161,36 @@
 	        var p2y = p[2].y; //cp2y
 	        var p3x = p[3].x; //終点x
 	        var p3y = p[3].y; //終点y
-	        /*
-	        const _p0x = p1x*t + (1-t)*p0x;
-	        const _p0y = p1y*t + (1-t)*p0y;
-	        const _p1x = p2x*t + (1-t)*p1x;
-	        const _p1y = p2y*t + (1-t)*p1y;
-	        const _p2x = p3x*t + (1-t)*p2x;
-	        const _p2y = p3y*t + (1-t)*p2y;
-	        const __p0x = _p1x*t + (1-t)*_p0x;
-	        const __p0y = _p1y*t + (1-t)*_p0y;
-	        const __p1x = _p2x*t + (1-t)*_p1x;
-	        const __p1y = _p2y*t + (1-t)*_p1y;
-	        const ___p0x = __p1x*t + (1-t)*__p0x;//これがベジェ点のx！！！
-	        const ___p0y = __p1y*t + (1-t)*__p0y;//これがベジェ点のy！！！
-	        */
-	        var ___p0x = p3x * t * t * t + 3 * (1 - t) * p2x * t * t + 3 * (1 - t) * (1 - t) * p1x * t + (1 - t) * (1 - t) * (1 - t) * p0x; //これがベジェ点のx！！！
-	        var ___p0y = p3y * t * t * t + 3 * (1 - t) * p2y * t * t + 3 * (1 - t) * (1 - t) * p1y * t + (1 - t) * (1 - t) * (1 - t) * p0y; //これがベジェ点のy！！！
+	        var bp = this.getBezier(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
 	        c.clear();
+	        c.lineStyle(10, 0xff0000, 0.3);
+	        var length = 50;
+	        for (var i = 0; i <= length; i++) {
+	            var tt = i / length;
+	            var bbp = this.getBezier(tt, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
+	            if (i == 0) {
+	                c.moveTo(bbp.x, bbp.y);
+	            }
+	            else {
+	                c.lineTo(bbp.x, bbp.y);
+	            }
+	        }
 	        c.lineStyle(2, 0x000000, 0.3);
 	        c.moveTo(p0x, p0y);
 	        c.lineTo(p1x, p1y);
 	        c.lineTo(p2x, p2y);
 	        c.lineTo(p3x, p3y);
-	        /*
-	        c.lineStyle(2, 0x000000, 0.6);
-	        c.moveTo(_p0x, _p0y);
-	        c.lineTo(_p1x, _p1y);
-	        c.lineTo(_p2x, _p2y);
-
-	        c.lineStyle(2, 0x000000, 0.9);
-	        c.moveTo(__p0x, __p0y);
-	        c.lineTo(__p1x, __p1y);
-	        */
 	        c.lineStyle();
 	        c.beginFill(0x0000ff);
-	        c.drawCircle(___p0x, ___p0y, 10);
+	        c.drawCircle(bp.x, bp.y, 10);
 	        c.endFill();
-	        c.beginFill(0x0000ff);
-	        this.line.push({ x: ___p0x, y: ___p0y });
-	        this.line.forEach(function (p, i) {
-	            c.drawCircle(p.x, p.y, 2);
-	        });
-	        if (this.line.length > 100) {
-	            this.line.shift();
-	        }
+	    };
+	    Main.prototype.getBezier = function (t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y) {
+	        var mt = 1 - t;
+	        return {
+	            x: p3x * t * t * t + 3 * mt * p2x * t * t + 3 * mt * mt * p1x * t + mt * mt * mt * p0x,
+	            y: p3y * t * t * t + 3 * mt * p2y * t * t + 3 * mt * mt * p1y * t + mt * mt * mt * p0y
+	        };
 	    };
 	    Main.prototype.mousedown = function () {
 	    };
