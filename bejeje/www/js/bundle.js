@@ -162,33 +162,38 @@
 	        var p2y = p[2].y; //cp2y
 	        var p3x = p[3].x; //終点x
 	        var p3y = p[3].y; //終点y
-	        var _p0x = (p1x - p0x) * t + p0x;
-	        var _p0y = (p1y - p0y) * t + p0y;
-	        var _p1x = (p2x - p1x) * t + p1x;
-	        var _p1y = (p2y - p1y) * t + p1y;
-	        var _p2x = (p3x - p2x) * t + p2x;
-	        var _p2y = (p3y - p2y) * t + p2y;
-	        var __p0x = (_p1x - _p0x) * t + _p0x;
-	        var __p0y = (_p1y - _p0y) * t + _p0y;
-	        var __p1x = (_p2x - _p1x) * t + _p1x;
-	        var __p1y = (_p2y - _p1y) * t + _p1y;
-	        var ___p0x = (__p1x - __p0x) * t + __p0x; //これがベジェ点のx！！！
-	        var ___p0y = (__p1y - __p0y) * t + __p0y; //これがベジェ点のy！！！
-	        //const ___p0x = (1-t)*(1-t)*(1-t)*p0x + 3*(1-t)*(1-t)*t*p1x + 3*(1-t)*t*t*p2x + t*t*t*p3x;
-	        //const ___p0y = (1-t)*(1-t)*(1-t)*p0y + 3*(1-t)*(1-t)*t*p1y + 3*(1-t)*t*t*p2y + t*t*t*p3y;
+	        /*
+	        const _p0x = p1x*t + (1-t)*p0x;
+	        const _p0y = p1y*t + (1-t)*p0y;
+	        const _p1x = p2x*t + (1-t)*p1x;
+	        const _p1y = p2y*t + (1-t)*p1y;
+	        const _p2x = p3x*t + (1-t)*p2x;
+	        const _p2y = p3y*t + (1-t)*p2y;
+	        const __p0x = _p1x*t + (1-t)*_p0x;
+	        const __p0y = _p1y*t + (1-t)*_p0y;
+	        const __p1x = _p2x*t + (1-t)*_p1x;
+	        const __p1y = _p2y*t + (1-t)*_p1y;
+	        const ___p0x = __p1x*t + (1-t)*__p0x;//これがベジェ点のx！！！
+	        const ___p0y = __p1y*t + (1-t)*__p0y;//これがベジェ点のy！！！
+	        */
+	        var ___p0x = p3x * t * t * t + 3 * (1 - t) * p2x * t * t + 3 * (1 - t) * (1 - t) * p1x * t + (1 - t) * (1 - t) * (1 - t) * p0x; //これがベジェ点のx！！！
+	        var ___p0y = p3y * t * t * t + 3 * (1 - t) * p2y * t * t + 3 * (1 - t) * (1 - t) * p1y * t + (1 - t) * (1 - t) * (1 - t) * p0y; //これがベジェ点のy！！！
 	        c.clear();
 	        c.lineStyle(2, 0x000000, 0.3);
 	        c.moveTo(p0x, p0y);
 	        c.lineTo(p1x, p1y);
 	        c.lineTo(p2x, p2y);
 	        c.lineTo(p3x, p3y);
+	        /*
 	        c.lineStyle(2, 0x000000, 0.6);
 	        c.moveTo(_p0x, _p0y);
 	        c.lineTo(_p1x, _p1y);
 	        c.lineTo(_p2x, _p2y);
+
 	        c.lineStyle(2, 0x000000, 0.9);
 	        c.moveTo(__p0x, __p0y);
 	        c.lineTo(__p1x, __p1y);
+	        */
 	        c.lineStyle();
 	        c.beginFill(0x0000ff);
 	        c.drawCircle(___p0x, ___p0y, 10);
