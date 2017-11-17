@@ -295,12 +295,12 @@
 	            //*/
 	        });
 	        this.body.bone.forEach(function (p, id) {
-	            if (id % 3 > 0)
+	            if (id % 2 > 0)
 	                return;
 	            var r = (_this.body.bone.length - id) / _this.body.bone.length;
 	            kelps.push({
 	                pos: p,
-	                radius: r * 30 * (id % 6 == 0 ? 0.5 : 1),
+	                radius: r * 30 * (id % 4 == 0 ? 0.5 : 1),
 	                ratio: 1
 	            });
 	        });
