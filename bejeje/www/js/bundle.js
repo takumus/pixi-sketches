@@ -132,6 +132,7 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var canvas_1 = __webpack_require__(2);
+	var bezier_1 = __webpack_require__(3);
 	var Main = (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
@@ -142,15 +143,16 @@
 	    Main.prototype.init = function () {
 	        var _this = this;
 	        this.pos = [];
-	        this.pos.push(new Point(30, 600));
-	        this.pos.push(new Point(60, 150));
-	        this.pos.push(new Point(900, 60));
-	        this.pos.push(new Point(1100, 600));
+	        this.pos.push(new Point(0, 400));
+	        this.pos.push(new Point(400, 400));
+	        this.pos.push(new Point(0, 0));
+	        this.pos.push(new Point(400, 0));
 	        this.pos.forEach(function (p) { return _this.addChild(p); });
+	        this.cb = bezier_1.CubicBezier(0.68, -0.55, 0.265, 1.55, 30);
 	    };
 	    Main.prototype.draw = function () {
-	        this.t += 0.02;
-	        var t = (Math.cos(this.t) + 1) / 2;
+	        this.t += 0.5;
+	        var t = (this.t % 60 / 60);
 	        var c = this.canvas;
 	        var p = this.pos;
 	        var p0x = p[0].x; //始点x
@@ -161,35 +163,40 @@
 	        var p2y = p[2].y; //cp2y
 	        var p3x = p[3].x; //終点x
 	        var p3y = p[3].y; //終点y
-	        var bp = this.getBezier(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
 	        c.clear();
 	        c.lineStyle(10, 0xff0000, 0.3);
-	        var length = 50;
-	        for (var i = 0; i <= length; i++) {
-	            var tt = i / length;
-	            var bbp = this.getBezier(tt, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
+	        for (var i = 0; i <= 100; i++) {
+	            var t_1 = i / 100;
+	            var bp_1 = this.getBezierXY(t_1, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
 	            if (i == 0) {
-	                c.moveTo(bbp.x, bbp.y);
+	                c.moveTo(bp_1.x, bp_1.y);
 	            }
 	            else {
-	                c.lineTo(bbp.x, bbp.y);
+	                c.lineTo(bp_1.x, bp_1.y);
 	            }
 	        }
+	        var bp = this.getBezierXY(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
 	        c.lineStyle(2, 0x000000, 0.3);
 	        c.moveTo(p0x, p0y);
 	        c.lineTo(p1x, p1y);
-	        c.lineTo(p2x, p2y);
+	        c.moveTo(p2x, p2y);
 	        c.lineTo(p3x, p3y);
 	        c.lineStyle();
 	        c.beginFill(0x0000ff);
 	        c.drawCircle(bp.x, bp.y, 10);
 	        c.endFill();
+	        c.beginFill(0x0000ff);
+	        c.drawCircle(100 + this.cb(t) * 400, 300, 10);
+	        c.endFill();
 	    };
-	    Main.prototype.getBezier = function (t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y) {
+	    Main.prototype.getBezier = function (t, p0, p1, p2, p3) {
 	        var mt = 1 - t;
+	        return p3 * t * t * t + 3 * mt * p2 * t * t + 3 * mt * mt * p1 * t + mt * mt * mt * p0;
+	    };
+	    Main.prototype.getBezierXY = function (t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y) {
 	        return {
-	            x: p3x * t * t * t + 3 * mt * p2x * t * t + 3 * mt * mt * p1x * t + mt * mt * mt * p0x,
-	            y: p3y * t * t * t + 3 * mt * p2y * t * t + 3 * mt * mt * p1y * t + mt * mt * mt * p0y
+	            x: this.getBezier(t, p0x, p1x, p2x, p3x),
+	            y: this.getBezier(t, p0y, p1y, p2y, p3y)
 	        };
 	    };
 	    Main.prototype.mousedown = function () {
@@ -209,8 +216,8 @@
 	    function Point(x, y, c) {
 	        if (c === void 0) { c = 0xff0000; }
 	        var _this = _super.call(this) || this;
-	        _this.x = x;
-	        _this.y = y;
+	        _this.x = x + 100;
+	        _this.y = y + 100;
 	        var g = new PIXI.Graphics();
 	        g.beginFill(c);
 	        g.drawCircle(0, 0, 10);
@@ -278,6 +285,44 @@
 	}(PIXI.Container));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Canvas;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function CubicBezier(p1x, p1y, p2x, p2y, res) {
+	    if (res === void 0) { res = 20; }
+	    var xtList = [];
+	    p1y = 1 - p1y;
+	    p2y = 1 - p2y;
+	    for (var i = 0; i <= res; i++) {
+	        var t = i / res;
+	        xtList.push({
+	            x: _getBezier(t, 0, p1x, p2x, 1),
+	            t: t
+	        });
+	    }
+	    return function bezier(x) {
+	        for (var i = 0; i < res; i++) {
+	            var a = xtList[i];
+	            var b = xtList[i + 1];
+	            if (a.x <= x && x <= b.x) {
+	                var dx = b.x - a.x;
+	                var dt = b.t - a.t;
+	                var t = (x - a.x) / dx * dt + a.t;
+	                return 1 - _getBezier(t, 1, p1y, p2y, 0);
+	            }
+	        }
+	        return 0;
+	    };
+	    function _getBezier(t, p0, p1, p2, p3) {
+	        var mt = 1 - t;
+	        return p3 * t * t * t + 3 * mt * p2 * t * t + 3 * mt * mt * p1 * t + mt * mt * mt * p0;
+	    }
+	}
+	exports.CubicBezier = CubicBezier;
 
 
 /***/ }

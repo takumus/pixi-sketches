@@ -1,18 +1,22 @@
 import Canvas from '../.src/canvas';
+import {CubicBezier} from './bezier';
 export default class Main extends Canvas {
     private pos: Point[];
     private t: number = 0;
+    private cb: (n: number) => number;
     public init() {
         this.pos = [];
-        this.pos.push(new Point(30, 600));
-        this.pos.push(new Point(60, 150));
-        this.pos.push(new Point(900, 60));
-        this.pos.push(new Point(1100, 600));
+        this.pos.push(new Point(0, 400));
+        this.pos.push(new Point(400, 400));
+        this.pos.push(new Point(0, 0));
+        this.pos.push(new Point(400, 0));
         this.pos.forEach((p) => this.addChild(p));
+
+        this.cb = CubicBezier(0.68, -0.55, 0.265, 1.55, 30);
     }
     public draw() {
-        this.t += 0.02;
-        const t = (Math.cos(this.t) + 1) / 2;
+        this.t += 0.5;
+        let t =  (this.t % 60 / 60);
         const c = this.canvas;
         const p = this.pos;
         const p0x = p[0].x;//始点x
@@ -24,35 +28,43 @@ export default class Main extends Canvas {
         const p3x = p[3].x;//終点x
         const p3y = p[3].y;//終点y
 
-        const bp = this.getBezier(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
         c.clear();
         c.lineStyle(10, 0xff0000, 0.3);
-        const length = 50;
-        for (let i = 0; i <= length; i ++) {
-            const tt = i / length;
-            const bbp = this.getBezier(tt, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
+        for (let i = 0; i <= 100; i ++) {
+            const t = i / 100;
+            const bp = this.getBezierXY(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
             if (i == 0) {
-                c.moveTo(bbp.x, bbp.y);
+                c.moveTo(bp.x, bp.y);
             }else {
-                c.lineTo(bbp.x, bbp.y);
+                c.lineTo(bp.x, bp.y);
             }
         }
+
+        const bp = this.getBezierXY(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
+        
         c.lineStyle(2, 0x000000, 0.3);
         c.moveTo(p0x, p0y);
         c.lineTo(p1x, p1y);
-        c.lineTo(p2x, p2y);
+        c.moveTo(p2x, p2y);
         c.lineTo(p3x, p3y);
 
         c.lineStyle();
         c.beginFill(0x0000ff);
         c.drawCircle(bp.x, bp.y, 10);
         c.endFill();
+
+        c.beginFill(0x0000ff);
+        c.drawCircle(100 + this.cb(t) * 400, 300, 10);
+        c.endFill();
     }
-    public getBezier(t: number, p0x: number, p0y: number, p1x: number, p1y: number, p2x: number, p2y: number, p3x: number, p3y: number): Pos {
+    public getBezier(t: number, p0: number, p1: number, p2: number, p3: number): number {
         const mt = 1 - t;
+        return p3*t*t*t + 3*mt*p2*t*t + 3*mt*mt*p1*t + mt*mt*mt*p0;
+    }
+    public getBezierXY(t: number, p0x: number, p0y: number, p1x: number, p1y: number, p2x: number, p2y: number, p3x: number, p3y: number): Pos {
         return {
-            x: p3x*t*t*t + 3*mt*p2x*t*t + 3*mt*mt*p1x*t + mt*mt*mt*p0x,
-            y: p3y*t*t*t + 3*mt*p2y*t*t + 3*mt*mt*p1y*t + mt*mt*mt*p0y
+            x: this.getBezier(t, p0x, p1x, p2x, p3x),
+            y: this.getBezier(t, p0y, p1y, p2y, p3y)
         };
     }
     public mousedown() {
@@ -71,8 +83,8 @@ interface Pos {
 class Point extends PIXI.Container {
     constructor(x: number, y: number, c: number = 0xff0000) {
         super();
-        this.x = x;
-        this.y = y;
+        this.x = x + 100;
+        this.y = y + 100;
         const g = new PIXI.Graphics();
         g.beginFill(c);
         g.drawCircle(0, 0, 10);
