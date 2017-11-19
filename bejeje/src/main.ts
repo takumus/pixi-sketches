@@ -1,9 +1,7 @@
 import Canvas from '../.src/canvas';
-import {CubicBezier} from './bezier';
 export default class Main extends Canvas {
     private pos: Point[];
     private t: number = 0;
-    private cb: (n: number) => number;
     public init() {
         this.pos = [];
         this.pos.push(new Point(0, 400));
@@ -11,8 +9,6 @@ export default class Main extends Canvas {
         this.pos.push(new Point(0, 0));
         this.pos.push(new Point(400, 0));
         this.pos.forEach((p) => this.addChild(p));
-
-        this.cb = CubicBezier(0.68, -0.55, 0.265, 1.55, 30);
     }
     public draw() {
         this.t += 0.5;
@@ -51,10 +47,6 @@ export default class Main extends Canvas {
         c.lineStyle();
         c.beginFill(0x0000ff);
         c.drawCircle(bp.x, bp.y, 10);
-        c.endFill();
-
-        c.beginFill(0x0000ff);
-        c.drawCircle(100 + this.cb(t) * 400, 300, 10);
         c.endFill();
     }
     public getBezier(t: number, p0: number, p1: number, p2: number, p3: number): number {

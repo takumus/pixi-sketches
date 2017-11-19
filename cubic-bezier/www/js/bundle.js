@@ -59,49 +59,27 @@
 	    renderer.view.style.height = "100%";
 	    window.addEventListener("resize", resize);
 	    window.addEventListener('orientationchange', resize);
-	    window.addEventListener('mousedown', function (e) {
-	        main.mouse.x = e.clientX;
-	        main.mouse.y = e.clientY;
-	        main.mousePressed = true;
-	        main.mousedown();
-	    });
-	    window.addEventListener('mouseup', function (e) {
-	        main.mousePressed = false;
-	        main.mouseup();
-	    });
-	    window.addEventListener('mousemove', function (e) {
-	        main.mouse.x = e.clientX;
-	        main.mouse.y = e.clientY;
-	        main.mousemove();
-	    });
-	    window.addEventListener('touchstart', function (e) {
-	        main.mouse.x = e.touches[0].clientX;
-	        main.mouse.y = e.touches[0].clientY;
-	        main.mousePressed = true;
-	        main.mousedown();
-	    });
-	    window.addEventListener('touchmove', function (e) {
-	        main.mouse.x = e.touches[0].clientX;
-	        main.mouse.y = e.touches[0].clientY;
-	        main.mousemove();
-	    });
-	    window.addEventListener('touchend', function (e) {
-	        if (e.touches.length > 0)
-	            return;
-	        main.mousePressed = false;
-	        main.mouseup();
-	    });
-	    window.addEventListener('touchcancel', function (e) {
-	        if (e.touches.length > 0)
-	            return;
-	        main.mousePressed = false;
-	        main.mouseup();
-	    });
+	    window.addEventListener('mousedown', mousedown);
+	    window.addEventListener('mouseup', mouseup);
+	    window.addEventListener('mousemove', mousemove);
 	    stage.addChild(main);
 	    draw();
 	    resize();
 	};
 	var ppos = 0;
+	var mousedown = function (e) {
+	    main.mouse.x = e.clientX;
+	    main.mouse.y = e.clientY;
+	    main.mousedown();
+	};
+	var mousemove = function (e) {
+	    main.mouse.x = e.clientX;
+	    main.mouse.y = e.clientY;
+	    main.mousemove();
+	};
+	var mouseup = function (e) {
+	    main.mouseup();
+	};
 	var draw = function () {
 	    requestAnimationFrame(draw);
 	    main.draw();
@@ -135,70 +113,20 @@
 	var Main = (function (_super) {
 	    __extends(Main, _super);
 	    function Main() {
-	        var _this = _super !== null && _super.apply(this, arguments) || this;
-	        _this.t = 0;
-	        return _this;
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
 	    Main.prototype.init = function () {
-	        var _this = this;
-	        this.pos = [];
-	        this.pos.push(new Point(0, 400));
-	        this.pos.push(new Point(400, 400));
-	        this.pos.push(new Point(0, 0));
-	        this.pos.push(new Point(400, 0));
-	        this.pos.forEach(function (p) { return _this.addChild(p); });
 	    };
 	    Main.prototype.draw = function () {
-	        this.t += 0.5;
-	        var t = (this.t % 60 / 60);
-	        var c = this.canvas;
-	        var p = this.pos;
-	        var p0x = p[0].x; //始点x
-	        var p0y = p[0].y; //始点y
-	        var p1x = p[1].x; //cp1x
-	        var p1y = p[1].y; //cp1y
-	        var p2x = p[2].x; //cp2x
-	        var p2y = p[2].y; //cp2y
-	        var p3x = p[3].x; //終点x
-	        var p3y = p[3].y; //終点y
-	        c.clear();
-	        c.lineStyle(10, 0xff0000, 0.3);
-	        for (var i = 0; i <= 100; i++) {
-	            var t_1 = i / 100;
-	            var bp_1 = this.getBezierXY(t_1, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
-	            if (i == 0) {
-	                c.moveTo(bp_1.x, bp_1.y);
-	            }
-	            else {
-	                c.lineTo(bp_1.x, bp_1.y);
-	            }
-	        }
-	        var bp = this.getBezierXY(t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y);
-	        c.lineStyle(2, 0x000000, 0.3);
-	        c.moveTo(p0x, p0y);
-	        c.lineTo(p1x, p1y);
-	        c.moveTo(p2x, p2y);
-	        c.lineTo(p3x, p3y);
-	        c.lineStyle();
-	        c.beginFill(0x0000ff);
-	        c.drawCircle(bp.x, bp.y, 10);
-	        c.endFill();
-	    };
-	    Main.prototype.getBezier = function (t, p0, p1, p2, p3) {
-	        var mt = 1 - t;
-	        return p3 * t * t * t + 3 * mt * p2 * t * t + 3 * mt * mt * p1 * t + mt * mt * mt * p0;
-	    };
-	    Main.prototype.getBezierXY = function (t, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y) {
-	        return {
-	            x: this.getBezier(t, p0x, p1x, p2x, p3x),
-	            y: this.getBezier(t, p0y, p1y, p2y, p3y)
-	        };
 	    };
 	    Main.prototype.mousedown = function () {
 	    };
 	    Main.prototype.mouseup = function () {
 	    };
 	    Main.prototype.mousemove = function () {
+	        this.canvas.clear();
+	        this.canvas.beginFill(0xff0000);
+	        this.canvas.drawRect(this.mouse.x - 50, this.mouse.y - 50, 100, 100);
 	    };
 	    Main.prototype.resize = function (width, height) {
 	    };
@@ -206,40 +134,6 @@
 	}(canvas_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Main;
-	var Point = (function (_super) {
-	    __extends(Point, _super);
-	    function Point(x, y, c) {
-	        if (c === void 0) { c = 0xff0000; }
-	        var _this = _super.call(this) || this;
-	        _this.x = x + 100;
-	        _this.y = y + 100;
-	        var g = new PIXI.Graphics();
-	        g.beginFill(c);
-	        g.drawCircle(0, 0, 10);
-	        _this.addChild(g);
-	        _this.interactive = true;
-	        var drag = false;
-	        var vx = 0;
-	        var vy = 0;
-	        _this.on("mousedown", function () {
-	            drag = true;
-	        });
-	        _this.on("mousemove", function (e) {
-	            if (drag) {
-	                _this.x = e.data.global.x;
-	                _this.y = e.data.global.y;
-	            }
-	        });
-	        _this.on("mouseup", function () {
-	            drag = false;
-	        });
-	        _this.on("mouseupoutside", function () {
-	            drag = false;
-	        });
-	        return _this;
-	    }
-	    return Point;
-	}(PIXI.Container));
 
 
 /***/ },
