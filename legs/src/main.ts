@@ -2,6 +2,7 @@ import Canvas from '../.src/canvas';
 import * as Bugs from './bugs';
 import Pos from './pos';
 import * as Drawer from './drawer';
+import cb from 'cubic-bezier';
 export default class Main extends Canvas {
     private bodyRenderer: MyBodyRenderer;
     private pp: Pos;
@@ -165,7 +166,7 @@ class MyBodyRenderer extends PIXI.Container {
                         ratio: 1
                     }
                 ],
-                [Drawer.line.styles.sin, Drawer.line.styles.sin],
+                [cb(0.455, 0.03, 0.515, 0.955, 50), cb(0.215, 0.61, 0.355, 1, 50)],
                 0x999999+(0x111111 * Math.floor(id / 2)),
                 5
             );

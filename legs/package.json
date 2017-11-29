@@ -15,7 +15,9 @@
     "typescript": "*"
   },
   "dependencies": {
+    "@types/cubic-bezier": "^1.0.4",
     "@types/pixi.js": "*",
-    "@types/tween.js": "*"
+    "@types/tween.js": "*",
+    "cubic-bezier": "^1.0.7"
   }
 }
